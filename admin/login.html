@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Admin Login</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+<style>
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+  font-family:'Poppins',sans-serif;
+}
+
+body{
+  height:100vh;
+  background:#eef2ff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.container{
+  width:850px;
+  height:500px;
+  background:#fff;
+  border-radius:20px;
+  display:flex;
+  overflow:hidden;
+  box-shadow:0 20px 40px rgba(0,0,0,0.15);
+}
+
+/* LEFT PANEL */
+.left{
+  width:50%;
+  background:#6c8cff;
+  color:white;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  padding:40px;
+}
+
+.left h2{
+  font-size:28px;
+  margin-bottom:10px;
+}
+
+.left p{
+  font-size:14px;
+  opacity:.9;
+}
+
+.left button{
+  margin-top:20px;
+  padding:10px 30px;
+  border-radius:30px;
+  border:2px solid white;
+  background:transparent;
+  color:white;
+  cursor:pointer;
+}
+
+/* RIGHT PANEL */
+.right{
+  width:50%;
+  padding:50px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+}
+
+.right h2{
+  font-size:26px;
+  margin-bottom:20px;
+}
+
+.input-box{
+  margin-bottom:15px;
+}
+
+.input-box input{
+  width:100%;
+  padding:12px;
+  border-radius:8px;
+  border:1px solid #ddd;
+}
+
+.forgot{
+  font-size:13px;
+  text-align:right;
+  margin-bottom:20px;
+  color:#6c8cff;
+  cursor:pointer;
+}
+
+.login-btn{
+  background:#6c8cff;
+  border:none;
+  padding:12px;
+  color:white;
+  border-radius:30px;
+  cursor:pointer;
+  font-size:16px;
+}
+
+.social{
+  margin-top:20px;
+  text-align:center;
+}
+
+.social i{
+  margin:0 8px;
+  cursor:pointer;
+  font-size:18px;
+}
+
+@media(max-width:900px){
+  .container{
+    flex-direction:column;
+    width:90%;
+    height:auto;
+  }
+  .left,.right{
+    width:100%;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- LEFT -->
+  <div class="left">
+    <h2>Hello, Welcome!</h2>
+    <p>Pradeep Neupane</p>
+    <button>Login for post news.</button>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right">
+    <h2>Login</h2>
+
+    <div class="input-box">
+      <input type="email" id="email" placeholder="Email">
+    </div>
+
+    <div class="input-box">
+<input type="password" id="password" placeholder="Password">
+    </div>
+
+    <div class="forgot">Forgot password?</div>
+
+    <button class="login-btn" onclick="loginAdmin()">Login</button>
+
+    <p id="error" style="color:red; margin-top:10px;"></p>
+
+
+    <div class="social">
+      <p>or login with</p>
+      <i>G</i>
+      <i>f</i>
+      <i>in</i>
+    </div>
+  </div>
+
+</div>
+<script>
+  const SUPABASE_URL = "https://waqfebkbgyfhybompnsm.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndhcWZlYmtiZ3lmaHlib21wbnNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5MDE5MzQsImV4cCI6MjA4MTQ3NzkzNH0.0WttHhOGKaP60ixIkT1MnqV4jbxgteN68ez-nCYU16c";
+
+  const { createClient } = supabase;
+  const supabaseClient = createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+  );
+
+  async function loginAdmin() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+    const errorBox = document.getElementById("error");
+
+    errorBox.innerText = "";
+
+    const { error } = await supabaseClient.auth.signInWithPassword({
+          email,
+      password
+    });
+
+    if (error) {
+      errorBox.innerText = error.message;
+    } else {
+      window.location.href = "dashboard.html";
+    }
+  }
+</script>
+
+</body>
+</html>
