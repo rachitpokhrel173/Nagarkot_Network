@@ -1,206 +1,433 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Admin Login</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Login | Nagarkot Network</title>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --red: #C0272D; --red-dk: #8B1A1E;
+      --cream: #FDF8F3; --ink: #1A1410;
+      --muted: #6B6460; --border: #E8E0D8;
+      --gold: #D4A853;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-<style>
-*{
-  margin:0;
-  padding:0;
-  box-sizing:border-box;
-  font-family:'Poppins',sans-serif;
-}
+    body {
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      background: var(--cream);
+      overflow: hidden;
+    }
 
-body{
-  height:100vh;
-  background:#eef2ff;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
+    /* ── Left panel ── */
+    .left {
+      width: 45%;
+      background: var(--ink);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 48px;
+      overflow: hidden;
+    }
 
-.container{
-  width:850px;
-  height:500px;
-  background:#fff;
-  border-radius:20px;
-  display:flex;
-  overflow:hidden;
-  box-shadow:0 20px 40px rgba(0,0,0,0.15);
-}
+    /* Decorative circles */
+    .left::before {
+      content: '';
+      position: absolute;
+      width: 500px; height: 500px;
+      border-radius: 50%;
+      border: 1px solid rgba(255,255,255,0.05);
+      top: -150px; left: -150px;
+    }
+    .left::after {
+      content: '';
+      position: absolute;
+      width: 350px; height: 350px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(192,39,45,0.2) 0%, transparent 70%);
+      bottom: -80px; right: -80px;
+    }
 
-/* LEFT PANEL */
-.left{
-  width:50%;
-  background:#6c8cff;
-  color:white;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  padding:40px;
-}
+    .left-logo {
+      position: relative;
+      z-index: 2;
+    }
 
-.left h2{
-  font-size:28px;
-  margin-bottom:10px;
-}
+    .left-logo .name {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 900;
+      color: #fff;
+      line-height: 1.1;
+    }
 
-.left p{
-  font-size:14px;
-  opacity:.9;
-}
+    .left-logo .dot {
+      display: inline-block;
+      width: 8px; height: 8px;
+      background: var(--red);
+      border-radius: 50%;
+      vertical-align: middle;
+      margin-left: 2px;
+      margin-bottom: 4px;
+    }
 
-.left button{
-  margin-top:20px;
-  padding:10px 30px;
-  border-radius:30px;
-  border:2px solid white;
-  background:transparent;
-  color:white;
-  cursor:pointer;
-}
+    .left-logo .sub {
+      font-size: 11px;
+      color: rgba(255,255,255,0.35);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 6px;
+    }
 
-/* RIGHT PANEL */
-.right{
-  width:50%;
-  padding:50px;
-  display:flex;
-  flex-direction:column;
-  justify-content:center;
-}
+    .left-middle {
+      position: relative;
+      z-index: 2;
+    }
 
-.right h2{
-  font-size:26px;
-  margin-bottom:20px;
-}
+    .left-quote {
+      font-family: 'Playfair Display', serif;
+      font-size: 36px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.25;
+      margin-bottom: 20px;
+    }
 
-.input-box{
-  margin-bottom:15px;
-}
+    .left-quote span { color: var(--gold); }
 
-.input-box input{
-  width:100%;
-  padding:12px;
-  border-radius:8px;
-  border:1px solid #ddd;
-}
+    .left-desc {
+      font-size: 14px;
+      color: rgba(255,255,255,0.45);
+      line-height: 1.7;
+      max-width: 320px;
+    }
 
-.forgot{
-  font-size:13px;
-  text-align:right;
-  margin-bottom:20px;
-  color:#6c8cff;
-  cursor:pointer;
-}
+    .left-footer {
+      position: relative;
+      z-index: 2;
+      font-size: 12px;
+      color: rgba(255,255,255,0.2);
+    }
 
-.login-btn{
-  background:#6c8cff;
-  border:none;
-  padding:12px;
-  color:white;
-  border-radius:30px;
-  cursor:pointer;
-  font-size:16px;
-}
+    /* Decorative newspaper lines */
+    .newspaper-lines {
+      position: absolute;
+      bottom: 120px; left: 48px; right: 48px;
+      z-index: 1;
+    }
+    .newspaper-lines div {
+      height: 1px;
+      background: rgba(255,255,255,0.04);
+      margin-bottom: 14px;
+    }
 
-.social{
-  margin-top:20px;
-  text-align:center;
-}
+    /* ── Right panel ── */
+    .right {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px;
+      background: var(--cream);
+    }
 
-.social i{
-  margin:0 8px;
-  cursor:pointer;
-  font-size:18px;
-}
+    .login-card {
+      width: 100%;
+      max-width: 400px;
+    }
 
-@media(max-width:900px){
-  .container{
-    flex-direction:column;
-    width:90%;
-    height:auto;
-  }
-  .left,.right{
-    width:100%;
-  }
-}
-</style>
+    .login-card h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px;
+      font-weight: 900;
+      color: var(--ink);
+      margin-bottom: 6px;
+    }
+
+    .login-card .welcome {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 36px;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+
+    .field-wrap {
+      position: relative;
+      margin-bottom: 20px;
+    }
+
+    .field-wrap input {
+      width: 100%;
+      padding: 13px 16px 13px 44px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: var(--ink);
+      background: #fff;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+
+    .field-wrap input:focus {
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(192,39,45,0.08);
+    }
+
+    .field-wrap input::placeholder { color: #C4BAB6; }
+
+    .field-icon {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #C4BAB6;
+      width: 18px; height: 18px;
+    }
+
+    .forgot-link {
+      display: block;
+      text-align: right;
+      font-size: 12.5px;
+      color: var(--red);
+      font-weight: 600;
+      text-decoration: none;
+      margin-top: -12px;
+      margin-bottom: 28px;
+      cursor: pointer;
+    }
+
+    .login-btn {
+      width: 100%;
+      padding: 14px;
+      background: var(--ink);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: 0.3px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .login-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: var(--red);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s ease;
+    }
+
+    .login-btn:hover::after { transform: scaleX(1); }
+    .login-btn span { position: relative; z-index: 1; }
+
+    .login-btn:active { transform: scale(0.98); }
+
+    .error-msg {
+      display: none;
+      background: #FEF2F2;
+      border: 1px solid #FECACA;
+      color: #B91C1C;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 13px;
+      margin-top: 14px;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 24px 0;
+      color: var(--border);
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .divider::before, .divider::after {
+      content: ''; flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .site-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: none;
+      padding: 11px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      transition: all 0.18s;
+    }
+
+    .site-link:hover { border-color: var(--ink); color: var(--ink); }
+
+    .loading-spinner {
+      display: none;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 768px) {
+      .left { display: none; }
+      .right { padding: 32px 24px; }
+    }
+  </style>
 </head>
-
 <body>
 
-<div class="container">
-
-  <!-- LEFT -->
+  <!-- Left Panel -->
   <div class="left">
-    <h2>Hello, Welcome!</h2>
-    <p>Pradeep Neupane</p>
-    <button>Login for post news.</button>
+    <div class="left-logo">
+      <div class="name">नगरकोट<span class="dot"></span><br>Network</div>
+      <div class="sub">Admin Panel</div>
+    </div>
+
+    <div class="newspaper-lines">
+      <div></div><div></div><div></div><div></div>
+      <div></div><div></div><div></div><div></div>
+    </div>
+
+    <div class="left-middle">
+      <div class="left-quote">Publish the<br><span>truth.</span><br>Tell the story.</div>
+      <p class="left-desc">Manage Nagarkot Network's content, breaking news, and live Facebook sync — all from one place.</p>
+    </div>
+
+    <div class="left-footer">© 2026 Nagarkot Network — Developed by Rachit Pokhrel</div>
   </div>
 
-  <!-- RIGHT -->
+  <!-- Right Panel -->
   <div class="right">
-    <h2>Login</h2>
+    <div class="login-card">
+      <h2>Welcome back</h2>
+      <p class="welcome">Sign in to your admin dashboard</p>
 
-    <div class="input-box">
-      <input type="email" id="email" placeholder="Email">
-    </div>
+      <div>
+        <label class="field-label">Email address</label>
+        <div class="field-wrap">
+          <svg class="field-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+          <input type="email" id="email" placeholder="admin@nagarkotnetwork.com" autocomplete="email">
+        </div>
+      </div>
 
-    <div class="input-box">
-<input type="password" id="password" placeholder="Password">
-    </div>
+      <div>
+        <label class="field-label">Password</label>
+        <div class="field-wrap">
+          <svg class="field-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+          <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter') loginAdmin()">
+        </div>
+      </div>
 
-    <div class="forgot">Forgot password?</div>
+      <span class="forgot-link" onclick="handleForgotPassword()">Forgot password?</span>
 
-    <button class="login-btn" onclick="loginAdmin()">Login</button>
+      <button class="login-btn" onclick="loginAdmin()">
+        <span id="btnText">Sign in to Dashboard</span>
+        <div class="loading-spinner" id="spinner"></div>
+      </button>
 
-    <p id="error" style="color:red; margin-top:10px;"></p>
+      <div class="error-msg" id="errorMsg"></div>
 
+      <div class="divider">or</div>
 
-    <div class="social">
-      <p>or login with</p>
-      <i>G</i>
-      <i>f</i>
-      <i>in</i>
+      <a href="index.html" class="site-link">
+        <svg style="width:16px;height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+        View nagarkotnetwork.com
+      </a>
     </div>
   </div>
 
-</div>
 <script>
   const SUPABASE_URL = "https://waqfebkbgyfhybompnsm.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndhcWZlYmtiZ3lmaHlib21wbnNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5MDE5MzQsImV4cCI6MjA4MTQ3NzkzNH0.0WttHhOGKaP60ixIkT1MnqV4jbxgteN68ez-nCYU16c";
-
   const { createClient } = supabase;
-  const supabaseClient = createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY
-  );
+  const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // Redirect if already logged in
+  supabaseClient.auth.getSession().then(({ data }) => {
+    if (data.session) window.location.replace("dashboard.html");
+  });
 
   async function loginAdmin() {
-    const email = document.getElementById("email").value;
+    const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value;
-    const errorBox = document.getElementById("error");
+    const btn = document.querySelector('.login-btn');
+    const btnText = document.getElementById('btnText');
+    const spinner = document.getElementById('spinner');
+    const errorMsg = document.getElementById('errorMsg');
 
-    errorBox.innerText = "";
+    if (!email || !password) {
+      showError("Please enter your email and password.");
+      return;
+    }
 
-    const { error } = await supabaseClient.auth.signInWithPassword({
-          email,
-      password
-    });
+    // Loading state
+    btnText.style.display = 'none';
+    spinner.style.display = 'block';
+    btn.style.pointerEvents = 'none';
+    errorMsg.style.display = 'none';
+
+    const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
 
     if (error) {
-      errorBox.innerText = error.message;
+      showError(error.message === 'Invalid login credentials'
+        ? 'Invalid email or password. Please try again.'
+        : error.message);
+      btnText.style.display = '';
+      spinner.style.display = 'none';
+      btn.style.pointerEvents = '';
     } else {
       window.location.href = "dashboard.html";
     }
   }
-</script>
 
+  function showError(msg) {
+    const el = document.getElementById('errorMsg');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  async function handleForgotPassword() {
+    const email = document.getElementById("email").value.trim();
+    if (!email) { showError("Enter your email address first, then click Forgot password."); return; }
+    const { error } = await supabaseClient.auth.resetPasswordForEmail(email);
+    if (!error) {
+      document.getElementById('errorMsg').style.background = '#F0FDF4';
+      document.getElementById('errorMsg').style.borderColor = '#BBF7D0';
+      document.getElementById('errorMsg').style.color = '#14532D';
+      showError("✓ Password reset email sent! Check your inbox.");
+    }
+  }
+</script>
 </body>
 </html>
