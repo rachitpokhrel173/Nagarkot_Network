@@ -116,6 +116,26 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);}
     .check-item input{width:16px;height:16px;accent-color:var(--red);}
     .skeleton{background:linear-gradient(90deg,#F0EBE5 25%,#E8E0D8 50%,#F0EBE5 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:6px;}
     @keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:39;}
+    .mob-topbar-btn{display:none;background:none;border:none;cursor:pointer;padding:8px;border-radius:8px;color:var(--ink);}
+    .mob-topbar-btn:hover{background:var(--border);}
+    .mob-topbar-btn svg{width:22px;height:22px;}
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%) !important;transition:transform 0.3s;}
+      .sidebar.open{transform:translateX(0) !important;}
+      .sidebar-overlay.open{display:block;}
+      .main-wrap{margin-left:0 !important;width:100% !important;}
+      .mob-topbar-btn{display:flex !important;align-items:center;justify-content:center;}
+      .topbar{padding:0 16px !important;}
+      .page-content{padding:16px !important;}
+      .form-layout{grid-template-columns:1fr !important;}
+      .stats-row{grid-template-columns:repeat(2,1fr) !important;}
+      .settings-layout{grid-template-columns:1fr !important;}
+      .cat-grid{grid-template-columns:1fr !important;}
+      .filter-bar{flex-direction:column;}
+      .filter-bar input,.filter-bar select{width:100%;}
+    }
   </style>
 </head>
 <body>
@@ -128,8 +148,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);}
   supabaseClient.auth.getSession().then(({data})=>{if(!data.session)window.location.replace("login.html");});
 </script>
 
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 <div style="display:flex;min-height:100vh;width:100%;">
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
       <div class="nn">नगरकोट<span class="red-dot"></span><br>Network</div>
       <div class="sub">Admin Panel</div>
@@ -149,7 +170,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);}
 
   <div class="main-wrap">
     <header class="topbar">
-      <div class="topbar-title">All News</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="mob-topbar-btn" onclick="openSidebar()"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+        <div class="topbar-title">All News</div>
+      </div>
       <a href="post-news.html" class="btn-new" style="padding:8px 18px;background:var(--red);color:#fff;border-radius:9px;font-size:13px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
         <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
         New Article
@@ -394,6 +418,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);}
   function nextPage(){if(currentPage<Math.ceil(filteredNews.length/itemsPerPage)){currentPage++;displayNews();window.scrollTo(0,0);}}
 
   function timeAgo(d){const s=(Date.now()-new Date(d))/1000;if(s<60)return'Just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';}
+  
+  function openSidebar(){document.getElementById('sidebar').classList.add('open');document.getElementById('sidebarOverlay').classList.add('open');}
+  function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('open');}
+
   async function logout(){await supabaseClient.auth.signOut();window.location.replace('login.html');}
 </script>
 </body>

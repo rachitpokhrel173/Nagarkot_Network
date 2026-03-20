@@ -73,6 +73,26 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);}
     .btn-save{flex:1;padding:12px;background:var(--red);color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
     .btn-save:hover{background:var(--red-dk);}
     .btn-cancel{padding:12px 20px;background:#fff;color:var(--ink);border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
+
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:39;}
+    .mob-topbar-btn{display:none;background:none;border:none;cursor:pointer;padding:8px;border-radius:8px;color:var(--ink);}
+    .mob-topbar-btn:hover{background:var(--border);}
+    .mob-topbar-btn svg{width:22px;height:22px;}
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%) !important;transition:transform 0.3s;}
+      .sidebar.open{transform:translateX(0) !important;}
+      .sidebar-overlay.open{display:block;}
+      .main-wrap{margin-left:0 !important;width:100% !important;}
+      .mob-topbar-btn{display:flex !important;align-items:center;justify-content:center;}
+      .topbar{padding:0 16px !important;}
+      .page-content{padding:16px !important;}
+      .form-layout{grid-template-columns:1fr !important;}
+      .stats-row{grid-template-columns:repeat(2,1fr) !important;}
+      .settings-layout{grid-template-columns:1fr !important;}
+      .cat-grid{grid-template-columns:1fr !important;}
+      .filter-bar{flex-direction:column;}
+      .filter-bar input,.filter-bar select{width:100%;}
+    }
   </style>
 </head>
 <body>
@@ -85,8 +105,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);}
   supabaseClient.auth.getSession().then(({data})=>{if(!data.session)window.location.replace("login.html");});
 </script>
 
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 <div style="display:flex;min-height:100vh;width:100%;">
-  <aside class="sidebar">
+  <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
       <div class="nn">नगरकोट<span class="red-dot"></span><br>Network</div>
       <div class="sub">Admin Panel</div>
@@ -106,7 +127,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);}
 
   <div class="main-wrap">
     <header class="topbar">
-      <div class="topbar-title">Categories</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="mob-topbar-btn" onclick="openSidebar()"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+        <div class="topbar-title">Categories</div>
+      </div>
       <button onclick="openModal()" style="padding:8px 18px;background:var(--red);color:#fff;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
         <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
         Add Category
@@ -213,6 +237,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);}
   function editCat(c){isEdit=true;document.getElementById('modalTitle').textContent='Edit Category';document.getElementById('submitLabel').textContent='Save Changes';document.getElementById('editCatName').value=c.name;document.getElementById('catName').value=c.name;document.getElementById('catEn').value=c.english||'';document.getElementById('catDesc').value=c.description||'';document.getElementById('catColorPicker').value=c.color;document.getElementById('catColorText').value=c.color;document.getElementById('catModal').style.display='flex';}
   function closeModal(){document.getElementById('catModal').style.display='none';}
   function submitCat(){if(isEdit){alert('Category updated! (In production, stored in database.)');}else{alert('Category added! (In production, stored in database.)');}closeModal();}
+
+  
+  function openSidebar(){document.getElementById('sidebar').classList.add('open');document.getElementById('sidebarOverlay').classList.add('open');}
+  function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('open');}
 
   async function logout(){await supabaseClient.auth.signOut();window.location.replace('login.html');}
 </script>

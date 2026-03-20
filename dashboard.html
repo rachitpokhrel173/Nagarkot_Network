@@ -1,942 +1,310 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin Dashboard | Nagarkot Network</title>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap"
-    rel="stylesheet">
-  <meta http-equiv="Cache-Control" content="no-store" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <meta http-equiv="Cache-Control" content="no-store"/>
   <style>
-    :root {
-      --red: #C0272D;
-      --red-dk: #8B1A1E;
-      --cream: #FDF8F3;
-      --ink: #1A1410;
-      --muted: #6B6460;
-      --border: #E8E0D8;
-      --gold: #D4A853;
-    }
-
-    html,
-    body {
-      width: 100%;
-      margin: 0;
-      padding: 0;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--cream);
-      color: var(--ink);
-    }
-
-    h1,
-    h2,
-    h3 {
-      font-family: 'Playfair Display', serif;
-    }
-
-    .sidebar {
-      width: 240px;
-      background: var(--ink);
-      display: flex;
-      flex-direction: column;
-      position: fixed;
-      top: 0;
-      left: 0;
-      bottom: 0;
-      z-index: 40;
-    }
-
-    .sidebar-logo {
-      padding: 28px 24px 20px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .sidebar-logo .nn {
-      font-family: 'Playfair Display', serif;
-      font-size: 20px;
-      font-weight: 900;
-      color: #fff;
-      line-height: 1.1;
-    }
-
-    .red-dot {
-      display: inline-block;
-      width: 7px;
-      height: 7px;
-      background: var(--red);
-      border-radius: 50%;
-      margin-left: 2px;
-      vertical-align: middle;
-      margin-bottom: 3px;
-    }
-
-    .sidebar-logo .sub {
-      font-size: 10px;
-      color: rgba(255, 255, 255, 0.4);
-      text-transform: uppercase;
-      letter-spacing: 1.5px;
-      margin-top: 4px;
-    }
-
-    nav.sidebar-nav {
-      flex: 1;
-      padding: 16px 12px;
-      overflow-y: auto;
-    }
-
-    .nav-label {
-      font-size: 9px;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      color: rgba(255, 255, 255, 0.25);
-      padding: 12px 12px 6px;
-    }
-
-    .nav-link {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 8px;
-      color: rgba(255, 255, 255, 0.55);
-      font-size: 13.5px;
-      font-weight: 500;
-      text-decoration: none;
-      transition: all 0.18s;
-      margin-bottom: 2px;
-    }
-
-    .nav-link:hover {
-      background: rgba(255, 255, 255, 0.07);
-      color: #fff;
-    }
-
-    .nav-link.active {
-      background: var(--red);
-      color: #fff;
-    }
-
-    .nav-link svg {
-      width: 17px;
-      height: 17px;
-      flex-shrink: 0;
-    }
-
-    .fb-badge {
-      margin-left: auto;
-      background: #1877F2;
-      color: #fff;
-      font-size: 9px;
-      font-weight: 700;
-      padding: 2px 6px;
-      border-radius: 20px;
-    }
-
-    .sidebar-footer {
-      padding: 16px 12px;
-      border-top: 1px solid rgba(255, 255, 255, 0.08);
-    }
-
-    .logout-btn {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      width: 100%;
-      padding: 10px 12px;
-      border-radius: 8px;
-      background: rgba(192, 39, 45, 0.15);
-      color: #F87171;
-      font-size: 13px;
-      font-weight: 500;
-      border: none;
-      cursor: pointer;
-      transition: all 0.18s;
-    }
-
-    .logout-btn:hover {
-      background: rgba(192, 39, 45, 0.3);
-    }
-
-    .app {
-      display: flex;
-      min-height: 100vh;
-      width: 100%;
-    }
-
-    .main-wrap {
-      margin-left: 240px;
-      width: calc(100% - 240px);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .topbar {
-      background: #fff;
-      border-bottom: 1px solid var(--border);
-      padding: 0 32px;
-      height: 60px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      position: sticky;
-      top: 0;
-      z-index: 30;
-    }
-
-    .topbar-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 20px;
-      font-weight: 700;
-    }
-
-    .topbar-right {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .live-pill {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      background: #F0FDF4;
-      border: 1px solid #BBF7D0;
-      border-radius: 20px;
-      padding: 5px 12px;
-      font-size: 12px;
-      font-weight: 600;
-      color: #16A34A;
-    }
-
-    .live-pill::before {
-      content: '';
-      width: 7px;
-      height: 7px;
-      background: #16A34A;
-      border-radius: 50%;
-      animation: pulse 1.5s infinite;
-    }
-
-    @keyframes pulse {
-
-      0%,
-      100% {
-        opacity: 1;
-        transform: scale(1);
-      }
-
-      50% {
-        opacity: 0.5;
-        transform: scale(0.85);
-      }
-    }
-
-    .page-content {
-      flex: 1;
-      padding: 32px;
-    }
-
-    .quick-actions {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 28px;
-      flex-wrap: wrap;
-    }
-
-    .q-btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 18px;
-      border-radius: 10px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 13px;
-      font-weight: 600;
-      border: none;
-      cursor: pointer;
-      text-decoration: none;
-      transition: all 0.18s;
-    }
-
-    .q-btn svg {
-      width: 15px;
-      height: 15px;
-    }
-
-    .q-btn.primary {
-      background: var(--red);
-      color: #fff;
-    }
-
-    .q-btn.primary:hover {
-      background: var(--red-dk);
-      transform: translateY(-1px);
-    }
-
-    .q-btn.outline {
-      background: #fff;
-      color: var(--ink);
-      border: 1.5px solid var(--border);
-    }
-
-    .q-btn.outline:hover {
-      border-color: var(--ink);
-      transform: translateY(-1px);
-    }
-
-    .q-btn.fb {
-      background: #1877F2;
-      color: #fff;
-    }
-
-    .q-btn.fb:hover {
-      background: #1557C0;
-      transform: translateY(-1px);
-    }
-
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      margin-bottom: 28px;
-    }
-
-    .stat-card {
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 22px 24px;
-      position: relative;
-      overflow: hidden;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    .stat-card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 32px rgba(26, 20, 16, 0.08);
-    }
-
-    .stat-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 3px;
-    }
-
-    .stat-card.s-red::before {
-      background: var(--red);
-    }
-
-    .stat-card.s-blue::before {
-      background: #2563EB;
-    }
-
-    .stat-card.s-green::before {
-      background: #16A34A;
-    }
-
-    .stat-card.s-gold::before {
-      background: var(--gold);
-    }
-
-    .stat-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 14px;
-    }
-
-    .stat-icon svg {
-      width: 20px;
-      height: 20px;
-    }
-
-    .si-red {
-      background: #FEF2F2;
-      color: var(--red);
-    }
-
-    .si-blue {
-      background: #EFF6FF;
-      color: #2563EB;
-    }
-
-    .si-green {
-      background: #F0FDF4;
-      color: #16A34A;
-    }
-
-    .si-gold {
-      background: #FFFBEB;
-      color: #B45309;
-    }
-
-    .stat-num {
-      font-family: 'Playfair Display', serif;
-      font-size: 32px;
-      font-weight: 700;
-      line-height: 1;
-      margin-bottom: 4px;
-    }
-
-    .stat-label {
-      font-size: 12.5px;
-      color: var(--muted);
-      font-weight: 500;
-    }
-
-    .content-grid {
-      display: grid;
-      grid-template-columns: 1fr 360px;
-      gap: 20px;
-    }
-
-    .panel {
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      overflow: hidden;
-    }
-
-    .panel-header {
-      padding: 18px 24px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .panel-title {
-      font-family: 'Playfair Display', serif;
-      font-size: 16px;
-      font-weight: 700;
-    }
-
-    .panel-link {
-      font-size: 12.5px;
-      color: var(--red);
-      font-weight: 600;
-      text-decoration: none;
-    }
-
-    .panel-badge {
-      font-size: 11px;
-      font-weight: 600;
-      padding: 3px 10px;
-      border-radius: 20px;
-    }
-
-    .pb-blue {
-      background: #EFF6FF;
-      color: #2563EB;
-    }
-
-    .pb-green {
-      background: #F0FDF4;
-      color: #16A34A;
-    }
-
-    .news-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
-      padding: 16px 24px;
-      border-bottom: 1px solid var(--border);
-      transition: background 0.15s;
-    }
-
-    .news-item:last-child {
-      border-bottom: none;
-    }
-
-    .news-item:hover {
-      background: #FAFAF8;
-    }
-
-    .news-thumb {
-      width: 56px;
-      height: 56px;
-      border-radius: 8px;
-      object-fit: cover;
-      flex-shrink: 0;
-    }
-
-    .news-thumb-ph {
-      width: 56px;
-      height: 56px;
-      border-radius: 8px;
-      background: linear-gradient(135deg, #F3EDE8, #E8DDD5);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--muted);
-      flex-shrink: 0;
-    }
-
-    .news-meta {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .news-ttl {
-      font-size: 13.5px;
-      font-weight: 600;
-      line-height: 1.4;
-      margin-bottom: 6px;
-      display: -webkit-box;
-      -webkit-line-clamp: 2;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-
-    .news-tags {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .tag {
-      font-size: 10px;
-      font-weight: 600;
-      padding: 2px 8px;
-      border-radius: 20px;
-    }
-
-    .t-cat {
-      background: #EFF6FF;
-      color: #1D4ED8;
-    }
-
-    .t-break {
-      background: #FEF2F2;
-      color: var(--red);
-    }
-
-    .t-feat {
-      background: #FFFBEB;
-      color: #92400E;
-    }
-
-    .t-fb {
-      background: #EFF6FF;
-      color: #1877F2;
-    }
-
-    .news-time {
-      font-size: 11px;
-      color: var(--muted);
-    }
-
-    .fb-box {
-      border: 1.5px dashed #BFDBFE;
-      border-radius: 12px;
-      padding: 20px;
-      text-align: center;
-      background: #F8FBFF;
-      margin-bottom: 16px;
-    }
-
-    .fb-circle {
-      width: 48px;
-      height: 48px;
-      background: #1877F2;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 12px;
-    }
-
-    .setup-step {
-      display: flex;
-      gap: 10px;
-      padding: 9px 0;
-      border-bottom: 1px solid var(--border);
-      font-size: 12.5px;
-    }
-
-    .setup-step:last-child {
-      border-bottom: none;
-    }
-
-    .sn {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: var(--ink);
-      color: #fff;
-      font-size: 10px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      margin-top: 1px;
-    }
-
-    .act-item {
-      display: flex;
-      gap: 12px;
-      padding: 12px 24px;
-      border-bottom: 1px solid var(--border);
-      font-size: 13px;
-    }
-
-    .act-item:last-child {
-      border-bottom: none;
-    }
-
-    .act-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      margin-top: 4px;
-      flex-shrink: 0;
-    }
-
-    .skeleton {
-      background: linear-gradient(90deg, #F0EBE5 25%, #E8E0D8 50%, #F0EBE5 75%);
-      background-size: 200% 100%;
-      animation: shim 1.4s infinite;
-      border-radius: 6px;
-    }
-
-    @keyframes shim {
-      0% {
-        background-position: 200% 0;
-      }
-
-      100% {
-        background-position: -200% 0;
-      }
-    }
-
-    .empty {
-      padding: 40px 24px;
-      text-align: center;
-      color: var(--muted);
-      font-size: 13px;
-    }
-
-    .empty a {
-      color: var(--red);
-      font-weight: 600;
-      text-decoration: none;
-    }
-
-    @media(max-width:1100px) {
-      .content-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-
-    @media(max-width:900px) {
-      .stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-      }
+    :root{--red:#C0272D;--red-dk:#8B1A1E;--cream:#FDF8F3;--ink:#1A1410;--muted:#6B6460;--border:#E8E0D8;--gold:#D4A853;}
+    html,body{width:100%;margin:0;padding:0;}
+    *{box-sizing:border-box;}
+    body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);}
+    h1,h2,h3{font-family:'Playfair Display',serif;}
+    .sidebar{width:240px;background:var(--ink);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:40;}
+    .sidebar-logo{padding:28px 24px 20px;border-bottom:1px solid rgba(255,255,255,0.08);}
+    .sidebar-logo .nn{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:#fff;line-height:1.1;}
+    .red-dot{display:inline-block;width:7px;height:7px;background:var(--red);border-radius:50%;margin-left:2px;vertical-align:middle;margin-bottom:3px;}
+    .sidebar-logo .sub{font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1.5px;margin-top:4px;}
+    nav.sidebar-nav{flex:1;padding:16px 12px;overflow-y:auto;}
+    .nav-label{font-size:9px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.25);padding:12px 12px 6px;}
+    .nav-link{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:rgba(255,255,255,0.55);font-size:13.5px;font-weight:500;text-decoration:none;transition:all 0.18s;margin-bottom:2px;}
+    .nav-link:hover{background:rgba(255,255,255,0.07);color:#fff;}
+    .nav-link.active{background:var(--red);color:#fff;}
+    .nav-link svg{width:17px;height:17px;flex-shrink:0;}
+    .fb-badge{margin-left:auto;background:#1877F2;color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:20px;}
+    .sidebar-footer{padding:16px 12px;border-top:1px solid rgba(255,255,255,0.08);}
+    .logout-btn{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border-radius:8px;background:rgba(192,39,45,0.15);color:#F87171;font-size:13px;font-weight:500;border:none;cursor:pointer;transition:all 0.18s;}
+    .logout-btn:hover{background:rgba(192,39,45,0.3);}
+    .app{display:flex;min-height:100vh;width:100%;}
+    .main-wrap{margin-left:240px;width:calc(100% - 240px);min-height:100vh;display:flex;flex-direction:column;transition:margin 0.3s;}
+    .topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:30;}
+    .topbar-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;}
+    .topbar-right{display:flex;align-items:center;gap:16px;}
+    .live-pill{display:flex;align-items:center;gap:6px;background:#F0FDF4;border:1px solid #BBF7D0;border-radius:20px;padding:5px 12px;font-size:12px;font-weight:600;color:#16A34A;}
+    .live-pill::before{content:'';width:7px;height:7px;background:#16A34A;border-radius:50%;animation:pulse 1.5s infinite;}
+    @keyframes pulse{0%,100%{opacity:1;transform:scale(1);}50%{opacity:0.5;transform:scale(0.85);}}
+    .page-content{flex:1;padding:32px;}
+    .quick-actions{display:flex;gap:10px;margin-bottom:28px;flex-wrap:wrap;}
+    .q-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 18px;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;border:none;cursor:pointer;text-decoration:none;transition:all 0.18s;}
+    .q-btn svg{width:15px;height:15px;}
+    .q-btn.primary{background:var(--red);color:#fff;}
+    .q-btn.primary:hover{background:var(--red-dk);transform:translateY(-1px);}
+    .q-btn.outline{background:#fff;color:var(--ink);border:1.5px solid var(--border);}
+    .q-btn.outline:hover{border-color:var(--ink);transform:translateY(-1px);}
+    .q-btn.fb{background:#1877F2;color:#fff;}
+    .q-btn.fb:hover{background:#1557C0;transform:translateY(-1px);}
+    .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+    .stat-card{background:#fff;border:1px solid var(--border);border-radius:14px;padding:22px 24px;position:relative;overflow:hidden;transition:transform 0.2s,box-shadow 0.2s;}
+    .stat-card:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(26,20,16,0.08);}
+    .stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;}
+    .stat-card.s-red::before{background:var(--red);}
+    .stat-card.s-blue::before{background:#2563EB;}
+    .stat-card.s-green::before{background:#16A34A;}
+    .stat-card.s-gold::before{background:var(--gold);}
+    .stat-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
+    .stat-icon svg{width:20px;height:20px;}
+    .si-red{background:#FEF2F2;color:var(--red);}
+    .si-blue{background:#EFF6FF;color:#2563EB;}
+    .si-green{background:#F0FDF4;color:#16A34A;}
+    .si-gold{background:#FFFBEB;color:#B45309;}
+    .stat-num{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;line-height:1;margin-bottom:4px;}
+    .stat-label{font-size:12.5px;color:var(--muted);font-weight:500;}
+    .content-grid{display:grid;grid-template-columns:1fr 360px;gap:20px;}
+    .panel{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+    .panel-header{padding:18px 24px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;}
+    .panel-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;}
+    .panel-link{font-size:12.5px;color:var(--red);font-weight:600;text-decoration:none;}
+    .panel-badge{font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;}
+    .pb-blue{background:#EFF6FF;color:#2563EB;}
+    .pb-green{background:#F0FDF4;color:#16A34A;}
+    .news-item{display:flex;align-items:flex-start;gap:14px;padding:16px 24px;border-bottom:1px solid var(--border);transition:background 0.15s;}
+    .news-item:last-child{border-bottom:none;}
+    .news-item:hover{background:#FAFAF8;}
+    .news-thumb{width:56px;height:56px;border-radius:8px;object-fit:cover;flex-shrink:0;}
+    .news-thumb-ph{width:56px;height:56px;border-radius:8px;background:linear-gradient(135deg,#F3EDE8,#E8DDD5);display:flex;align-items:center;justify-content:center;color:var(--muted);flex-shrink:0;}
+    .news-meta{flex:1;min-width:0;}
+    .news-ttl{font-size:13.5px;font-weight:600;line-height:1.4;margin-bottom:6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+    .news-tags{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+    .tag{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;}
+    .t-cat{background:#EFF6FF;color:#1D4ED8;}
+    .t-break{background:#FEF2F2;color:var(--red);}
+    .t-feat{background:#FFFBEB;color:#92400E;}
+    .t-fb{background:#EFF6FF;color:#1877F2;}
+    .news-time{font-size:11px;color:var(--muted);}
+    .fb-box{border:1.5px dashed #BFDBFE;border-radius:12px;padding:20px;text-align:center;background:#F8FBFF;margin-bottom:16px;}
+    .fb-circle{width:48px;height:48px;background:#1877F2;border-radius:12px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;}
+    .setup-step{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);font-size:12.5px;}
+    .setup-step:last-child{border-bottom:none;}
+    .sn{width:20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+    .act-item{display:flex;gap:12px;padding:12px 24px;border-bottom:1px solid var(--border);font-size:13px;}
+    .act-item:last-child{border-bottom:none;}
+    .act-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0;}
+    .skeleton{background:linear-gradient(90deg,#F0EBE5 25%,#E8E0D8 50%,#F0EBE5 75%);background-size:200% 100%;animation:shim 1.4s infinite;border-radius:6px;}
+    @keyframes shim{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+    .empty{padding:40px 24px;text-align:center;color:var(--muted);font-size:13px;}
+    .empty a{color:var(--red);font-weight:600;text-decoration:none;}
+    @media(max-width:1100px){.content-grid{grid-template-columns:1fr;}}
+    @media(max-width:900px){.stats-grid{grid-template-columns:repeat(2,1fr);}}
+
+    /* ── Mobile ── */
+    .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:39;}
+    .mob-topbar-btn{display:none;background:none;border:none;cursor:pointer;padding:8px;border-radius:8px;color:var(--ink);}
+    .mob-topbar-btn:hover{background:var(--border);}
+    .mob-topbar-btn svg{width:22px;height:22px;}
+
+    @media(max-width:768px){
+      .sidebar{transform:translateX(-100%);transition:transform 0.3s;}
+      .sidebar.open{transform:translateX(0);}
+      .sidebar-overlay.open{display:block;}
+      .main-wrap{margin-left:0 !important;width:100% !important;}
+      .mob-topbar-btn{display:flex;align-items:center;justify-content:center;}
+      .topbar{padding:0 16px;}
+      .topbar-title{font-size:17px;}
+      .page-content{padding:16px;}
+      .stats-grid{grid-template-columns:repeat(2,1fr);gap:10px;}
+      .stat-card{padding:16px;}
+      .stat-num{font-size:26px;}
+      .quick-actions{flex-wrap:wrap;gap:8px;}
+      .q-btn{font-size:12px;padding:8px 14px;}
+      .content-grid{grid-template-columns:1fr;gap:14px;}
+      .date-txt{display:none;}
+    }
+    @media(max-width:400px){
+      .stats-grid{grid-template-columns:1fr 1fr;}
+      .stat-card{padding:14px 12px;}
     }
   </style>
 </head>
-
 <body>
 
-  <script>
-    const SUPABASE_URL = "https://waqfebkbgyfhybompnsm.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndhcWZlYmtiZ3lmaHlib21wbnNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5MDE5MzQsImV4cCI6MjA4MTQ3NzkzNH0.0WttHhOGKaP60ixIkT1MnqV4jbxgteN68ez-nCYU16c";
-    const { createClient } = supabase;
-    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    supabaseClient.auth.getSession().then(({ data }) => { if (!data.session) window.location.replace("login.html"); });
-  </script>
+<script>
+  const SUPABASE_URL="https://waqfebkbgyfhybompnsm.supabase.co";
+  const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndhcWZlYmtiZ3lmaHlib21wbnNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5MDE5MzQsImV4cCI6MjA4MTQ3NzkzNH0.0WttHhOGKaP60ixIkT1MnqV4jbxgteN68ez-nCYU16c";
+  const{createClient}=supabase;
+  const supabaseClient=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  supabaseClient.auth.getSession().then(({data})=>{if(!data.session)window.location.replace("login.html");});
+</script>
 
-  <div class="app">
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="sidebar-logo">
-        <div class="nn">नगरकोट<span class="red-dot"></span><br>Network</div>
-        <div class="sub">Admin Panel</div>
-      </div>
-      <nav class="sidebar-nav">
-        <div class="nav-label">Main</div>
-        <a href="dashboard.html" class="nav-link active"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
-          </svg>Dashboard</a>
-        <a href="post-news.html" class="nav-link"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>Post News</a>
-        <a href="all-news.html" class="nav-link"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-          </svg>All News</a>
-        <a href="categories.html" class="nav-link"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-          </svg>Categories</a>
-        <div class="nav-label" style="margin-top:8px;">Integrations</div>
-        <a href="settings.html" class="nav-link"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-          </svg>Facebook Sync<span class="fb-badge">NEW</span></a>
-        <a href="settings.html" class="nav-link"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>Settings</a>
-      </nav>
-      <div class="sidebar-footer"><button onclick="logout()" class="logout-btn"><svg style="width:16px;height:16px;"
-            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-          </svg>Logout</button></div>
-    </aside>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="nn">नगरकोट<span class="red-dot"></span><br>Network</div>
+      <div class="sub">Admin Panel</div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Main</div>
+      <a href="dashboard.html" class="nav-link active"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/></svg>Dashboard</a>
+      <a href="post-news.html" class="nav-link"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>Post News</a>
+      <a href="all-news.html" class="nav-link"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>All News</a>
+      <a href="categories.html" class="nav-link"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>Categories</a>
+      <div class="nav-label" style="margin-top:8px;">Integrations</div>
+      <a href="settings.html" class="nav-link"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>Facebook Sync<span class="fb-badge">NEW</span></a>
+      <a href="settings.html" class="nav-link"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Settings</a>
+    </nav>
+    <div class="sidebar-footer"><button onclick="logout()" class="logout-btn"><svg style="width:16px;height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>Logout</button></div>
+  </aside>
 
-    <!-- Main -->
-    <div class="main-wrap">
-      <header class="topbar">
+  <!-- Main -->
+  <div class="main-wrap">
+    <header class="topbar">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="mob-topbar-btn" onclick="openSidebar()">
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
         <div class="topbar-title">Dashboard</div>
-        <div class="topbar-right">
-          <div class="live-pill">Live</div>
-          <span style="font-size:13px;color:var(--muted);" id="dateDisplay"></span>
-        </div>
-      </header>
+      </div>
+      <div class="topbar-right">
+        <div class="live-pill">Live</div>
+        <span style="font-size:13px;color:var(--muted);" id="dateDisplay"></span>
+      </div>
+    </header>
 
-      <main class="page-content">
+    <main class="page-content">
 
-        <!-- Quick Actions -->
-        <div class="quick-actions">
-          <a href="post-news.html" class="q-btn primary"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
-            </svg>New Article</a>
-          <a href="all-news.html" class="q-btn outline"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-            </svg>Manage Articles</a>
-          <button class="q-btn fb" onclick="window.location.href='settings.html'"><svg viewBox="0 0 24 24"
-              fill="currentColor" style="width:15px;height:15px;">
-              <path
-                d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-            </svg>FB Auto-Sync</button>
-          <a href="https://nagarkotnetwork.com" target="_blank" class="q-btn outline"><svg fill="none"
-              stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-            </svg>View Site</a>
-        </div>
+      <!-- Quick Actions -->
+      <div class="quick-actions">
+        <a href="post-news.html" class="q-btn primary"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>New Article</a>
+        <a href="all-news.html" class="q-btn outline"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>Manage Articles</a>
+        <button class="q-btn fb" onclick="window.location.href='settings.html'"><svg viewBox="0 0 24 24" fill="currentColor" style="width:15px;height:15px;"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>FB Auto-Sync</button>
+        <a href="https://nagarkotnetwork.com" target="_blank" class="q-btn outline"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>View Site</a>
+      </div>
 
-        <!-- Stats -->
-        <div class="stats-grid">
-          <div class="stat-card s-red">
-            <div class="stat-icon si-red"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-              </svg></div>
-            <div class="stat-num" id="totalNews">—</div>
-            <div class="stat-label">Total Articles</div>
+      <!-- Stats -->
+      <div class="stats-grid">
+        <div class="stat-card s-red"><div class="stat-icon si-red"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg></div><div class="stat-num" id="totalNews">—</div><div class="stat-label">Total Articles</div></div>
+        <div class="stat-card s-blue"><div class="stat-icon si-blue"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></div><div class="stat-num" id="breakingCount">—</div><div class="stat-label">Breaking News</div></div>
+        <div class="stat-card s-green"><div class="stat-icon si-green"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg></div><div class="stat-num" id="featuredCount">—</div><div class="stat-label">Featured</div></div>
+        <div class="stat-card s-gold"><div class="stat-icon si-gold"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></div><div class="stat-num" id="fbSyncCount">—</div><div class="stat-label">FB Auto-Synced</div></div>
+      </div>
+
+      <!-- Content Grid -->
+      <div class="content-grid">
+
+        <!-- Recent Articles panel -->
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Recent Articles</div>
+            <a href="all-news.html" class="panel-link">View all →</a>
           </div>
-          <div class="stat-card s-blue">
-            <div class="stat-icon si-blue"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg></div>
-            <div class="stat-num" id="breakingCount">—</div>
-            <div class="stat-label">Breaking News</div>
-          </div>
-          <div class="stat-card s-green">
-            <div class="stat-icon si-green"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
-              </svg></div>
-            <div class="stat-num" id="featuredCount">—</div>
-            <div class="stat-label">Featured</div>
-          </div>
-          <div class="stat-card s-gold">
-            <div class="stat-icon si-gold"><svg viewBox="0 0 24 24" fill="currentColor">
-                <path
-                  d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-              </svg></div>
-            <div class="stat-num" id="fbSyncCount">—</div>
-            <div class="stat-label">FB Auto-Synced</div>
+          <div id="recentNewsList">
+            <div class="news-item"><div class="news-thumb-ph skeleton" style="width:56px;height:56px;border-radius:8px;flex-shrink:0;"></div><div style="flex:1;"><div class="skeleton" style="height:14px;width:80%;margin-bottom:8px;"></div><div class="skeleton" style="height:12px;width:50%;"></div></div></div>
+            <div class="news-item"><div class="news-thumb-ph skeleton" style="width:56px;height:56px;border-radius:8px;flex-shrink:0;"></div><div style="flex:1;"><div class="skeleton" style="height:14px;width:70%;margin-bottom:8px;"></div><div class="skeleton" style="height:12px;width:40%;"></div></div></div>
+            <div class="news-item"><div class="news-thumb-ph skeleton" style="width:56px;height:56px;border-radius:8px;flex-shrink:0;"></div><div style="flex:1;"><div class="skeleton" style="height:14px;width:85%;margin-bottom:8px;"></div><div class="skeleton" style="height:12px;width:45%;"></div></div></div>
           </div>
         </div>
 
-        <!-- Content Grid -->
-        <div class="content-grid">
-
-          <!-- Recent Articles panel -->
+        <!-- Right side -->
+        <div style="display:flex;flex-direction:column;gap:20px;">
+          <!-- FB Setup -->
           <div class="panel">
             <div class="panel-header">
-              <div class="panel-title">Recent Articles</div>
-              <a href="all-news.html" class="panel-link">View all →</a>
+              <div class="panel-title">Facebook Auto-Sync</div>
+              <span class="panel-badge pb-blue">Setup Required</span>
             </div>
-            <div id="recentNewsList">
-              <div class="news-item">
-                <div class="news-thumb-ph skeleton" style="width:56px;height:56px;border-radius:8px;flex-shrink:0;">
-                </div>
-                <div style="flex:1;">
-                  <div class="skeleton" style="height:14px;width:80%;margin-bottom:8px;"></div>
-                  <div class="skeleton" style="height:12px;width:50%;"></div>
-                </div>
+            <div style="padding:20px 24px;">
+              <div class="fb-box">
+                <div class="fb-circle"><svg viewBox="0 0 24 24" fill="white" style="width:24px;height:24px;"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></div>
+                <div style="font-size:13px;font-weight:600;margin-bottom:4px;">Post on FB → Auto-publish here</div>
+                <div style="font-size:12px;color:var(--muted);line-height:1.5;">Connect your Facebook Page to auto-sync posts to nagarkotnetwork.com</div>
               </div>
-              <div class="news-item">
-                <div class="news-thumb-ph skeleton" style="width:56px;height:56px;border-radius:8px;flex-shrink:0;">
-                </div>
-                <div style="flex:1;">
-                  <div class="skeleton" style="height:14px;width:70%;margin-bottom:8px;"></div>
-                  <div class="skeleton" style="height:12px;width:40%;"></div>
-                </div>
-              </div>
-              <div class="news-item">
-                <div class="news-thumb-ph skeleton" style="width:56px;height:56px;border-radius:8px;flex-shrink:0;">
-                </div>
-                <div style="flex:1;">
-                  <div class="skeleton" style="height:14px;width:85%;margin-bottom:8px;"></div>
-                  <div class="skeleton" style="height:12px;width:45%;"></div>
-                </div>
-              </div>
+              <div style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">Quick Steps</div>
+              <div class="setup-step"><div class="sn">1</div><div>Create Facebook Developer App</div></div>
+              <div class="setup-step"><div class="sn">2</div><div>Deploy Supabase Edge Function</div></div>
+              <div class="setup-step"><div class="sn">3</div><div>Register webhook URL in FB</div></div>
+              <div class="setup-step"><div class="sn">4</div><div>Subscribe to Page Feed events</div></div>
+              <div class="setup-step"><div class="sn">5</div><div>Submit for FB App Review</div></div>
+              <a href="settings.html" style="display:block;width:100%;text-align:center;padding:11px;border-radius:10px;background:#1877F2;color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;text-decoration:none;margin-top:14px;transition:all 0.18s;">Go to Setup Guide →</a>
             </div>
           </div>
 
-          <!-- Right side -->
-          <div style="display:flex;flex-direction:column;gap:20px;">
-            <!-- FB Setup -->
-            <div class="panel">
-              <div class="panel-header">
-                <div class="panel-title">Facebook Auto-Sync</div>
-                <span class="panel-badge pb-blue">Setup Required</span>
-              </div>
-              <div style="padding:20px 24px;">
-                <div class="fb-box">
-                  <div class="fb-circle"><svg viewBox="0 0 24 24" fill="white" style="width:24px;height:24px;">
-                      <path
-                        d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                    </svg></div>
-                  <div style="font-size:13px;font-weight:600;margin-bottom:4px;">Post on FB → Auto-publish here</div>
-                  <div style="font-size:12px;color:var(--muted);line-height:1.5;">Connect your Facebook Page to
-                    auto-sync posts to nagarkotnetwork.com</div>
-                </div>
-                <div
-                  style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px;">
-                  Quick Steps</div>
-                <div class="setup-step">
-                  <div class="sn">1</div>
-                  <div>Create Facebook Developer App</div>
-                </div>
-                <div class="setup-step">
-                  <div class="sn">2</div>
-                  <div>Deploy Supabase Edge Function</div>
-                </div>
-                <div class="setup-step">
-                  <div class="sn">3</div>
-                  <div>Register webhook URL in FB</div>
-                </div>
-                <div class="setup-step">
-                  <div class="sn">4</div>
-                  <div>Subscribe to Page Feed events</div>
-                </div>
-                <div class="setup-step">
-                  <div class="sn">5</div>
-                  <div>Submit for FB App Review</div>
-                </div>
-                <a href="settings.html"
-                  style="display:block;width:100%;text-align:center;padding:11px;border-radius:10px;background:#1877F2;color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;text-decoration:none;margin-top:14px;transition:all 0.18s;">Go
-                  to Setup Guide →</a>
-              </div>
+          <!-- Activity -->
+          <div class="panel">
+            <div class="panel-header">
+              <div class="panel-title">Recent Activity</div>
+              <span class="panel-badge pb-green">Live</span>
             </div>
-
-            <!-- Activity -->
-            <div class="panel">
-              <div class="panel-header">
-                <div class="panel-title">Recent Activity</div>
-                <span class="panel-badge pb-green">Live</span>
-              </div>
-              <div id="activityFeed">
-                <div class="act-item">
-                  <div class="act-dot skeleton" style="width:8px;height:8px;flex-shrink:0;margin-top:4px;"></div>
-                  <div style="flex:1;">
-                    <div class="skeleton" style="height:13px;width:90%;margin-bottom:5px;"></div>
-                    <div class="skeleton" style="height:11px;width:50%;"></div>
-                  </div>
-                </div>
-              </div>
+            <div id="activityFeed">
+              <div class="act-item"><div class="act-dot skeleton" style="width:8px;height:8px;flex-shrink:0;margin-top:4px;"></div><div style="flex:1;"><div class="skeleton" style="height:13px;width:90%;margin-bottom:5px;"></div><div class="skeleton" style="height:11px;width:50%;"></div></div></div>
             </div>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </main>
   </div>
+</div>
 
-  <script>
-    document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('ne-NP', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+<script>
+  function openSidebar(){document.getElementById('sidebar').classList.add('open');document.getElementById('sidebarOverlay').classList.add('open');}
+  function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sidebarOverlay').classList.remove('open');}
 
-    async function loadDashboard() {
-      try {
-        const [{ count: total }, { count: breaking }, { count: featured }, { count: fbSync }] = await Promise.all([
-          supabaseClient.from('news').select('*', { count: 'exact', head: true }),
-          supabaseClient.from('news').select('*', { count: 'exact', head: true }).eq('is_breaking', true),
-          supabaseClient.from('news').select('*', { count: 'exact', head: true }).eq('is_featured', true),
-          supabaseClient.from('news').select('*', { count: 'exact', head: true }).eq('source', 'facebook'),
-        ]);
-        document.getElementById('totalNews').textContent = total ?? 0;
-        document.getElementById('breakingCount').textContent = breaking ?? 0;
-        document.getElementById('featuredCount').textContent = featured ?? 0;
-        document.getElementById('fbSyncCount').textContent = fbSync ?? 0;
+  document.getElementById('dateDisplay').textContent = new Date().toLocaleDateString('ne-NP',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 
-        const { data: articles } = await supabaseClient.from('news').select('id,title,category,image_url,is_breaking,is_featured,source,published_at,created_at').order('created_at', { ascending: false }).limit(8);
-        const list = document.getElementById('recentNewsList');
-        if (articles && articles.length) {
-          list.innerHTML = articles.map(a => `
+  async function loadDashboard() {
+    try {
+      const [{count:total},{count:breaking},{count:featured},{count:fbSync}] = await Promise.all([
+        supabaseClient.from('news').select('*',{count:'exact',head:true}),
+        supabaseClient.from('news').select('*',{count:'exact',head:true}).eq('is_breaking',true),
+        supabaseClient.from('news').select('*',{count:'exact',head:true}).eq('is_featured',true),
+        supabaseClient.from('news').select('*',{count:'exact',head:true}).eq('source','facebook'),
+      ]);
+      document.getElementById('totalNews').textContent=total??0;
+      document.getElementById('breakingCount').textContent=breaking??0;
+      document.getElementById('featuredCount').textContent=featured??0;
+      document.getElementById('fbSyncCount').textContent=fbSync??0;
+
+      const{data:articles}=await supabaseClient.from('news').select('id,title,category,image_url,is_breaking,is_featured,source,published_at,created_at').order('created_at',{ascending:false}).limit(8);
+      const list=document.getElementById('recentNewsList');
+      if(articles&&articles.length){
+        list.innerHTML=articles.map(a=>`
           <div class="news-item">
-            ${a.image_url ? `<img class="news-thumb" src="${a.image_url}" alt="" onerror="this.style.display='none'">` : `<div class="news-thumb-ph"><svg style="width:20px;height:20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div>`}
+            ${a.image_url?`<img class="news-thumb" src="${a.image_url}" alt="" onerror="this.style.display='none'">`:`<div class="news-thumb-ph"><svg style="width:20px;height:20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div>`}
             <div class="news-meta">
               <div class="news-ttl">${a.title}</div>
               <div class="news-tags">
                 <span class="tag t-cat">${a.category}</span>
-                ${a.is_breaking ? '<span class="tag t-break">🔴 Breaking</span>' : ''}
-                ${a.is_featured ? '<span class="tag t-feat">⭐ Featured</span>' : ''}
-                ${a.source === 'facebook' ? '<span class="tag t-fb">📘 FB</span>' : ''}
-                <span class="news-time">${timeAgo(a.created_at || a.published_at)}</span>
+                ${a.is_breaking?'<span class="tag t-break">🔴 Breaking</span>':''}
+                ${a.is_featured?'<span class="tag t-feat">⭐ Featured</span>':''}
+                ${a.source==='facebook'?'<span class="tag t-fb">📘 FB</span>':''}
+                <span class="news-time">${timeAgo(a.created_at||a.published_at)}</span>
               </div>
             </div>
           </div>`).join('');
-        } else {
-          list.innerHTML = `<div class="empty">No articles yet. <a href="post-news.html">Publish your first →</a></div>`;
-        }
+      } else {
+        list.innerHTML=`<div class="empty">No articles yet. <a href="post-news.html">Publish your first →</a></div>`;
+      }
 
-        const feed = document.getElementById('activityFeed');
-        if (articles && articles.length) {
-          feed.innerHTML = articles.slice(0, 5).map(a => `
+      const feed=document.getElementById('activityFeed');
+      if(articles&&articles.length){
+        feed.innerHTML=articles.slice(0,5).map(a=>`
           <div class="act-item">
-            <div class="act-dot" style="background:${a.source === 'facebook' ? '#1877F2' : 'var(--red)'}"></div>
+            <div class="act-dot" style="background:${a.source==='facebook'?'#1877F2':'var(--red)'}"></div>
             <div>
-              <div style="font-size:12.5px;font-weight:500;line-height:1.4;">${a.title.slice(0, 55)}${a.title.length > 55 ? '…' : ''}</div>
-              <div style="font-size:11px;color:var(--muted);margin-top:3px;">${a.source === 'facebook' ? '📘 FB Sync' : '✍️ Manual'} · ${timeAgo(a.created_at || a.published_at)}</div>
+              <div style="font-size:12.5px;font-weight:500;line-height:1.4;">${a.title.slice(0,55)}${a.title.length>55?'…':''}</div>
+              <div style="font-size:11px;color:var(--muted);margin-top:3px;">${a.source==='facebook'?'📘 FB Sync':'✍️ Manual'} · ${timeAgo(a.created_at||a.published_at)}</div>
             </div>
           </div>`).join('');
-        }
-      } catch (err) { console.error('Dashboard error:', err); }
-    }
+      }
+    } catch(err){console.error('Dashboard error:',err);}
+  }
 
-    function timeAgo(d) { if (!d) return ''; const s = (Date.now() - new Date(d)) / 1000; if (s < 60) return 'Just now'; if (s < 3600) return Math.floor(s / 60) + 'm ago'; if (s < 86400) return Math.floor(s / 3600) + 'h ago'; return Math.floor(s / 86400) + 'd ago'; }
-    async function logout() { await supabaseClient.auth.signOut(); window.location.replace('login.html'); }
-    loadDashboard();
-  </script>
+  function timeAgo(d){if(!d)return'';const s=(Date.now()-new Date(d))/1000;if(s<60)return'Just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';}
+  async function logout(){await supabaseClient.auth.signOut();window.location.replace('login.html');}
+  loadDashboard();
+</script>
 </body>
-
 </html>
