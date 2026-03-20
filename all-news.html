@@ -1,720 +1,400 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>All News | Nagarkot Network Admin</title>
-  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <meta http-equiv="Cache-Control" content="no-store" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <meta http-equiv="Cache-Control" content="no-store"/>
+  <style>
+    :root{--red:#C0272D;--red-dk:#8B1A1E;--cream:#FDF8F3;--ink:#1A1410;--muted:#6B6460;--border:#E8E0D8;--gold:#D4A853;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    html,body{width:100%;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);}
+    h1,h2,h3{font-family:'Playfair Display',serif;}
+
+    /* Sidebar */
+    .sidebar{width:240px;background:var(--ink);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:40;}
+    .sidebar-logo{padding:28px 24px 20px;border-bottom:1px solid rgba(255,255,255,0.08);}
+    .sidebar-logo .nn{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:#fff;line-height:1.1;}
+    .red-dot{display:inline-block;width:7px;height:7px;background:var(--red);border-radius:50%;margin-left:2px;vertical-align:middle;margin-bottom:3px;}
+    .sidebar-logo .sub{font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1.5px;margin-top:4px;}
+    nav.sidebar-nav{flex:1;padding:16px 12px;overflow-y:auto;}
+    .nav-label{font-size:9px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.25);padding:12px 12px 6px;}
+    .nav-link{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:rgba(255,255,255,0.55);font-size:13.5px;font-weight:500;text-decoration:none;transition:all 0.18s;margin-bottom:2px;}
+    .nav-link:hover{background:rgba(255,255,255,0.07);color:#fff;}
+    .nav-link.active{background:var(--red);color:#fff;}
+    .nav-link svg{width:17px;height:17px;flex-shrink:0;}
+    .fb-badge{margin-left:auto;background:#1877F2;color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:20px;}
+    .sidebar-footer{padding:16px 12px;border-top:1px solid rgba(255,255,255,0.08);}
+    .logout-btn{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border-radius:8px;background:rgba(192,39,45,0.15);color:#F87171;font-size:13px;font-weight:500;border:none;cursor:pointer;transition:all 0.18s;}
+    .logout-btn:hover{background:rgba(192,39,45,0.3);}
+
+    .main-wrap{margin-left:240px;min-height:100vh;display:flex;flex-direction:column;flex:1;min-width:0;width:calc(100% - 240px);}
+    .topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:30;}
+    .topbar-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;}
+    .page-content{flex:1;padding:32px;}
+
+    /* Stats row */
+    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;}
+    .stat-mini{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 20px;}
+    .stat-mini .num{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;line-height:1;}
+    .stat-mini .lbl{font-size:12px;color:var(--muted);margin-top:4px;}
+
+    /* Filter bar */
+    .filter-bar{background:#fff;border:1px solid var(--border);border-radius:12px;padding:16px 20px;margin-bottom:20px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+    .filter-bar input,.filter-bar select{
+      padding:9px 14px;border:1.5px solid var(--border);border-radius:8px;
+      font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink);
+      background:#fff;outline:none;transition:border-color 0.18s;
+    }
+    .filter-bar input:focus,.filter-bar select:focus{border-color:var(--red);}
+    .filter-bar input{flex:1;min-width:180px;}
+    .filter-bar select{min-width:140px;}
+    .btn-clear{padding:9px 16px;background:transparent;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;transition:all 0.18s;}
+    .btn-clear:hover{border-color:var(--ink);color:var(--ink);}
+    .btn-new{padding:9px 18px;background:var(--red);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:all 0.18s;}
+    .btn-new:hover{background:var(--red-dk);}
+
+    /* Table */
+    .table-card{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+    table{width:100%;border-collapse:collapse;font-size:13.5px;}
+    thead tr{background:#FAFAF8;}
+    thead th{padding:12px 16px;text-align:left;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;border-bottom:1px solid var(--border);}
+    tbody tr{border-bottom:1px solid var(--border);transition:background 0.15s;}
+    tbody tr:last-child{border-bottom:none;}
+    tbody tr:hover{background:#FAFAF8;}
+    td{padding:14px 16px;vertical-align:middle;}
+
+    .news-title-cell .main{font-weight:600;line-height:1.4;margin-bottom:4px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;}
+    .news-title-cell .preview{font-size:12px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden;}
+
+    .tag{font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;display:inline-block;}
+    .tag.cat{background:#EFF6FF;color:#1D4ED8;}
+    .tag.breaking{background:#FEF2F2;color:var(--red);}
+    .tag.featured{background:#FFFBEB;color:#92400E;}
+    .tag.fb{background:#EFF6FF;color:#1877F2;}
+
+    .action-btn{padding:6px 12px;border-radius:7px;border:none;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.15s;}
+    .action-btn.edit{background:#EFF6FF;color:#1D4ED8;}
+    .action-btn.edit:hover{background:#DBEAFE;}
+    .action-btn.delete{background:#FEF2F2;color:var(--red);}
+    .action-btn.delete:hover{background:#FEE2E2;}
+
+    /* Pagination */
+    .table-footer{padding:14px 20px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--muted);}
+    .page-btns{display:flex;gap:8px;}
+    .page-btn{padding:7px 16px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:600;background:#fff;color:var(--ink);cursor:pointer;transition:all 0.15s;}
+    .page-btn:hover:not(:disabled){border-color:var(--ink);}
+    .page-btn:disabled{opacity:0.4;cursor:not-allowed;}
+
+    /* Bulk bar */
+    .bulk-bar{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,0.25);display:none;align-items:center;gap:12px;font-size:13px;font-weight:500;z-index:50;}
+    .bulk-btn{padding:6px 14px;border-radius:7px;border:none;font-size:12px;font-weight:600;cursor:pointer;}
+    .bulk-btn.red{background:var(--red);color:#fff;}
+    .bulk-btn.blue{background:#1877F2;color:#fff;}
+    .bulk-btn.dk{background:#8B1A1E;color:#fff;}
+
+    /* Edit modal */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:60;align-items:center;justify-content:center;padding:24px;}
+    .modal-box{background:#fff;border-radius:16px;width:100%;max-width:680px;max-height:90vh;overflow-y:auto;}
+    .modal-header{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#fff;z-index:2;}
+    .modal-header h3{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;}
+    .modal-close{background:none;border:none;cursor:pointer;color:var(--muted);padding:4px;border-radius:6px;}
+    .modal-close:hover{color:var(--ink);background:#F0EBE5;}
+    .modal-body{padding:24px;}
+    .field{margin-bottom:18px;}
+    .field label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:7px;}
+    .field input,.field select,.field textarea{width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13.5px;color:var(--ink);outline:none;transition:border-color 0.18s;}
+    .field input:focus,.field select:focus,.field textarea:focus{border-color:var(--red);}
+    .modal-actions{display:flex;gap:10px;padding:0 24px 24px;}
+    .btn-save{flex:1;padding:12px;background:var(--red);color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
+    .btn-cancel{padding:12px 20px;background:#fff;color:var(--ink);border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;}
+    .checks-row{display:flex;gap:20px;}
+    .check-item{display:flex;align-items:center;gap:8px;font-size:13px;}
+    .check-item input{width:16px;height:16px;accent-color:var(--red);}
+    .skeleton{background:linear-gradient(90deg,#F0EBE5 25%,#E8E0D8 50%,#F0EBE5 75%);background-size:200% 100%;animation:shimmer 1.4s infinite;border-radius:6px;}
+    @keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+  </style>
 </head>
+<body>
 
-<body class="bg-slate-100">
-
-<!-- Auth Guard -->
 <script>
-  const SUPABASE_URL = "https://waqfebkbgyfhybompnsm.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndhcWZlYmtiZ3lmaHlib21wbnNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5MDE5MzQsImV4cCI6MjA4MTQ3NzkzNH0.0WttHhOGKaP60ixIkT1MnqV4jbxgteN68ez-nCYU16c";
-  const { createClient } = supabase;
-  const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  supabaseClient.auth.getSession().then(({ data }) => {
-    if (!data.session) window.location.replace("login.html");
-  });
+  const SUPABASE_URL="https://waqfebkbgyfhybompnsm.supabase.co";
+  const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndhcWZlYmtiZ3lmaHlib21wbnNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5MDE5MzQsImV4cCI6MjA4MTQ3NzkzNH0.0WttHhOGKaP60ixIkT1MnqV4jbxgteN68ez-nCYU16c";
+  const{createClient}=supabase;
+  const supabaseClient=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  supabaseClient.auth.getSession().then(({data})=>{if(!data.session)window.location.replace("login.html");});
 </script>
 
-<div class="flex min-h-screen">
-  <!-- Sidebar -->
-  <!-- Sidebar -->
-  <aside class="w-64 bg-gradient-to-b from-slate-900 to-slate-800 text-white hidden md:flex flex-col shadow-2xl">
-    <div class="p-6 border-b border-slate-700">
-      <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-        Nagarkot Network
-      </h1>
-      <p class="text-xs text-slate-400 mt-1">Admin Panel</p>
+<div style="display:flex;min-height:100vh;width:100%;">
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="nn">नगरकोट<span class="red-dot"></span><br>Network</div>
+      <div class="sub">Admin Panel</div>
     </div>
-
-    <nav class="flex-1 p-4 space-y-2">
-      <a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-800 shadow-lg">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-        </svg>
-        <span class="font-medium">Dashboard</span>
-      </a>
-      
-      <a href="post-news.html" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-700 transition">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-        </svg>
-        <span>Post News</span>
-      </a>
-      
-      <a href="all-news.html" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-700 transition">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path>
-        </svg>
-        <span>All News</span>
-      </a>
-      
-      <a href="categories.html" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-700 transition">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-        </svg>
-        <span>Categories</span>
-      </a>
-      
-      <a href="settings.html" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-700 transition">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-          <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-        </svg>
-        <span>Settings</span>
-      </a>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Main</div>
+      <a href="dashboard.html" class="nav-link"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/></svg>Dashboard</a>
+      <a href="post-news.html" class="nav-link"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>Post News</a>
+      <a href="all-news.html" class="nav-link active"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>All News</a>
+      <a href="categories.html" class="nav-link"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>Categories</a>
+      <div class="nav-label" style="margin-top:8px;">Integrations</div>
+      <a href="settings.html" class="nav-link"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>Facebook Sync<span class="fb-badge">NEW</span></a>
+      <a href="settings.html" class="nav-link"><svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>Settings</a>
     </nav>
-
-    <div class="p-4 border-t border-slate-700">
-      <button onclick="logout()" class="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 py-3 rounded-lg transition font-medium">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-        </svg>
-        Logout
-      </button>
-    </div>
+    <div class="sidebar-footer"><button onclick="logout()" class="logout-btn"><svg style="width:16px;height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>Logout</button></div>
   </aside>
 
-  <!-- Main Content -->
-  <div class="flex-1">
-    <!-- Top Bar -->
-    <header class="bg-white shadow p-4 flex justify-between items-center">
-      <h1 class="text-xl font-semibold">All News</h1>
-      <a href="post-news.html" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
-        + New Article
+  <div class="main-wrap">
+    <header class="topbar">
+      <div class="topbar-title">All News</div>
+      <a href="post-news.html" class="btn-new" style="padding:8px 18px;background:var(--red);color:#fff;border-radius:9px;font-size:13px;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+        <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+        New Article
       </a>
     </header>
 
-    <!-- Content -->
-    <main class="p-6">
-      <!-- Filters -->
-      <div class="bg-white rounded-lg shadow p-4 mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <input type="text" id="searchInput" placeholder="Search news..." 
-            onkeyup="filterNews()"
-            class="border px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-          
-          <select id="categoryFilter" onchange="filterNews()" 
-            class="border px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <option value="">All Categories</option>
-            <option value="समाचार">समाचार</option>
-            <option value="राजनीति">राजनीति</option>
-            <option value="शिक्षा">शिक्षा</option>
-            <option value="प्रविधि">प्रविधि</option>
-            <option value="खेलकुद">खेलकुद</option>
-            <option value="अर्थ">अर्थ</option>
-          </select>
-
-          <select id="statusFilter" onchange="filterNews()"
-            class="border px-4 py-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500">
-            <option value="">All Status</option>
-            <option value="breaking">Breaking</option>
-            <option value="featured">Featured</option>
-          </select>
-
-          <button onclick="clearFilters()" 
-            class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded">
-            Clear Filters
-          </button>
-        </div>
+    <main class="page-content">
+      <div class="stats-row">
+        <div class="stat-mini"><div class="num" id="totalCount">—</div><div class="lbl">Total Articles</div></div>
+        <div class="stat-mini"><div class="num" id="breakingCount">—</div><div class="lbl">Breaking</div></div>
+        <div class="stat-mini"><div class="num" id="featuredCount">—</div><div class="lbl">Featured</div></div>
+        <div class="stat-mini"><div class="num" id="monthCount">—</div><div class="lbl">This Month</div></div>
       </div>
 
-      <!-- Stats Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="bg-white p-5 rounded shadow">
-          <p class="text-gray-500 text-sm">Total Articles</p>
-          <h2 id="totalCount" class="text-2xl font-bold">0</h2>
-        </div>
-        <div class="bg-white p-5 rounded shadow">
-          <p class="text-gray-500 text-sm">Breaking News</p>
-          <h2 id="breakingCount" class="text-2xl font-bold">0</h2>
-        </div>
-        <div class="bg-white p-5 rounded shadow">
-          <p class="text-gray-500 text-sm">Featured</p>
-          <h2 id="featuredCount" class="text-2xl font-bold">0</h2>
-        </div>
-        <div class="bg-white p-5 rounded shadow">
-          <p class="text-gray-500 text-sm">This Month</p>
-          <h2 id="monthCount" class="text-2xl font-bold">0</h2>
-        </div>
+      <div class="filter-bar">
+        <input type="text" id="searchInput" placeholder="Search articles…" oninput="filterNews()"/>
+        <select id="categoryFilter" onchange="filterNews()">
+          <option value="">All Categories</option>
+          <option value="समाचार">समाचार</option><option value="राजनीति">राजनीति</option>
+          <option value="शिक्षा">शिक्षा</option><option value="प्रविधि">प्रविधि</option>
+          <option value="खेलकुद">खेलकुद</option><option value="अर्थ">अर्थ</option>
+          <option value="मनोरञ्जन">मनोरञ्जन</option><option value="स्वास्थ्य">स्वास्थ्य</option>
+        </select>
+        <select id="statusFilter" onchange="filterNews()">
+          <option value="">All Status</option>
+          <option value="breaking">Breaking</option>
+          <option value="featured">Featured</option>
+          <option value="facebook">FB Synced</option>
+        </select>
+        <button class="btn-clear" onclick="clearFilters()">Clear</button>
       </div>
 
-      <!-- News Table -->
-      <div class="bg-white rounded-lg shadow overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead class="bg-slate-100 text-left">
-              <tr>
-                <th class="p-3 w-12">
-                  <input type="checkbox" id="selectAll" onchange="toggleSelectAll()">
-                </th>
-                <th class="p-3">Title</th>
-                <th class="p-3">Category</th>
-                <th class="p-3">Status</th>
-                <th class="p-3">Date</th>
-                <th class="p-3">Views</th>
-                <th class="p-3">Actions</th>
-              </tr>
-            </thead>
-            <tbody id="newsTableBody">
-              <tr>
-                <td colspan="7" class="p-8 text-center text-gray-500">
-                  <div class="flex items-center justify-center gap-2">
-                    <svg class="animate-spin h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Loading news...
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Pagination -->
-        <div class="border-t p-4 flex justify-between items-center">
-          <div class="text-sm text-gray-600">
-            Showing <span id="showingCount">0</span> of <span id="totalNewsCount">0</span> articles
-          </div>
-          <div class="flex gap-2">
-            <button onclick="previousPage()" id="prevBtn" disabled
-              class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50">
-              Previous
-            </button>
-            <button onclick="nextPage()" id="nextBtn" disabled
-              class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 disabled:opacity-50">
-              Next
-            </button>
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:36px;"><input type="checkbox" id="selectAll" onchange="toggleSelectAll()" style="accent-color:var(--red);width:15px;height:15px;"></th>
+              <th>Title</th>
+              <th>Category</th>
+              <th>Flags</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="newsTableBody">
+            <tr><td colspan="6" style="padding:40px;text-align:center;color:var(--muted);">
+              <div style="display:flex;align-items:center;justify-content:center;gap:8px;">
+                <svg style="width:18px;height:18px;animation:spin 1s linear infinite;color:var(--red);" fill="none" viewBox="0 0 24 24"><circle opacity=".25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path opacity=".75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
+                Loading articles…
+              </div>
+            </td></tr>
+          </tbody>
+        </table>
+        <div class="table-footer">
+          <div>Showing <strong id="showingCount">0</strong> of <strong id="totalNewsCount">0</strong> articles</div>
+          <div class="page-btns">
+            <button class="page-btn" id="prevBtn" onclick="previousPage()" disabled>← Prev</button>
+            <button class="page-btn" id="nextBtn" onclick="nextPage()" disabled>Next →</button>
           </div>
         </div>
-      </div>
-
-      <!-- Bulk Actions -->
-      <div id="bulkActions" class="hidden fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-4">
-        <span id="selectedCount">0 selected</span>
-        <button onclick="bulkToggleBreaking()" class="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm">
-          Toggle Breaking
-        </button>
-        <button onclick="bulkToggleFeatured()" class="bg-blue-600 hover:bg-blue-700 px-3 py-1 rounded text-sm">
-          Toggle Featured
-        </button>
-        <button onclick="bulkDelete()" class="bg-red-700 hover:bg-red-800 px-3 py-1 rounded text-sm">
-          Delete
-        </button>
-        <button onclick="clearSelection()" class="text-gray-300 hover:text-white">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path d="M6 18L18 6M6 6l12 12"></path>
-          </svg>
-        </button>
       </div>
     </main>
   </div>
 </div>
 
-<!-- Edit Modal -->
-<div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-  <div class="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-    <div class="sticky top-0 bg-white border-b p-4 flex justify-between items-center">
-      <h3 class="text-xl font-bold">Edit News</h3>
-      <button onclick="closeEditModal()" class="text-gray-500 hover:text-gray-700">
-        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path d="M6 18L18 6M6 6l12 12"></path>
-        </svg>
-      </button>
-    </div>
-    <form id="editForm" class="p-6 space-y-4">
-      <input type="hidden" id="editId">
-      
-      <div>
-        <label class="block text-sm font-semibold mb-2">Title</label>
-        <input type="text" id="editTitle" class="w-full border px-4 py-2 rounded" required>
-      </div>
+<!-- Bulk bar -->
+<div class="bulk-bar" id="bulkBar">
+  <span id="selectedCount">0 selected</span>
+  <button class="bulk-btn red" onclick="bulkToggleBreaking()">Toggle Breaking</button>
+  <button class="bulk-btn blue" onclick="bulkToggleFeatured()">Toggle Featured</button>
+  <button class="bulk-btn dk" onclick="bulkDelete()">Delete</button>
+  <button style="background:none;border:none;color:#aaa;cursor:pointer;font-size:18px;" onclick="clearSelection()">✕</button>
+</div>
 
-      <div>
-        <label class="block text-sm font-semibold mb-2">Category</label>
-        <select id="editCategory" class="w-full border px-4 py-2 rounded" required>
-          <option value="समाचार">समाचार</option>
-          <option value="राजनीति">राजनीति</option>
-          <option value="शिक्षा">शिक्षा</option>
-          <option value="प्रविधि">प्रविधि</option>
-          <option value="खेलकुद">खेलकुद</option>
-          <option value="अर्थ">अर्थ</option>
+<!-- Edit Modal -->
+<div class="modal-overlay" id="editModal" style="display:none;flex-wrap:wrap;">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Edit Article</h3>
+      <button class="modal-close" onclick="closeEditModal()"><svg style="width:20px;height:20px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="editId"/>
+      <div class="field"><label>Title</label><input type="text" id="editTitle" required/></div>
+      <div class="field"><label>Category</label>
+        <select id="editCategory">
+          <option value="समाचार">समाचार</option><option value="राजनीति">राजनीति</option>
+          <option value="शिक्षा">शिक्षा</option><option value="प्रविधि">प्रविधि</option>
+          <option value="खेलकुद">खेलकुद</option><option value="अर्थ">अर्थ</option>
+          <option value="मनोरञ्जन">मनोरञ्जन</option><option value="स्वास्थ्य">स्वास्थ्य</option>
         </select>
       </div>
-
-      <div>
-        <label class="block text-sm font-semibold mb-2">Content</label>
-        <textarea id="editContent" rows="8" class="w-full border px-4 py-2 rounded" required></textarea>
-      </div>
-
-      <div>
-        <label class="block text-sm font-semibold mb-2">Image</label>
-        
-        <!-- Current Image Preview -->
-        <div id="currentImagePreview" class="mb-3">
-          <img id="currentImage" src="" alt="Current" class="max-w-xs rounded border">
-        </div>
-        
-        <!-- Upload New Image -->
-        <div class="flex items-center gap-4">
-          <label for="editImageFile" class="cursor-pointer bg-blue-50 hover:bg-blue-100 text-blue-600 px-4 py-2 rounded border-2 border-blue-200 border-dashed transition text-sm">
-            Change Image
-          </label>
-          <input type="file" id="editImageFile" accept="image/*" class="hidden" onchange="handleEditImageSelect(event)">
-          <input type="hidden" id="editImageUrl">
-        </div>
-        
-        <!-- New Image Preview -->
-        <div id="editImagePreview" class="hidden mt-3">
-          <img id="editPreviewImg" src="" alt="Preview" class="max-w-xs rounded border">
-          <button type="button" onclick="removeEditImage()" class="text-red-600 text-sm mt-2">
-            Remove new image
-          </button>
-        </div>
-      </div>
-
-      <div class="flex gap-4">
-        <label class="flex items-center gap-2">
-          <input type="checkbox" id="editBreaking">
-          <span class="text-sm">Breaking News</span>
+      <div class="field"><label>Content</label><textarea id="editContent" rows="7" required></textarea></div>
+      <div class="field">
+        <label>Current Image</label>
+        <div id="currentImgWrap" style="display:none;margin-bottom:10px;"><img id="currentImg" style="max-height:140px;border-radius:8px;border:1px solid var(--border);"/></div>
+        <label for="editImageFile" style="display:inline-flex;align-items:center;gap:8px;padding:9px 16px;background:#EFF6FF;color:#1D4ED8;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:1.5px dashed #BFDBFE;">
+          <svg style="width:14px;height:14px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01"/></svg>
+          Change Image
         </label>
-        <label class="flex items-center gap-2">
-          <input type="checkbox" id="editFeatured">
-          <span class="text-sm">Featured</span>
-        </label>
+        <input type="file" id="editImageFile" accept="image/*" style="display:none;" onchange="handleEditImg(event)"/>
+        <input type="hidden" id="editImageUrl"/>
+        <div id="editImgPreviewWrap" style="display:none;margin-top:10px;"><img id="editImgPreview" style="max-height:100px;border-radius:8px;"/></div>
       </div>
-
-      <div class="flex gap-3 pt-4">
-        <button type="submit" class="flex-1 bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">
-          Save Changes
-        </button>
-        <button type="button" onclick="closeEditModal()" 
-          class="bg-gray-200 text-gray-700 px-6 py-2 rounded hover:bg-gray-300">
-          Cancel
-        </button>
+      <div class="field">
+        <label>Flags</label>
+        <div class="checks-row">
+          <label class="check-item"><input type="checkbox" id="editBreaking"/> Breaking News</label>
+          <label class="check-item"><input type="checkbox" id="editFeatured"/> Featured</label>
+        </div>
       </div>
-    </form>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-cancel" onclick="closeEditModal()">Cancel</button>
+      <button class="btn-save" onclick="saveEdit()">Save Changes</button>
+    </div>
   </div>
 </div>
 
+<style>@keyframes spin{to{transform:rotate(360deg);}}</style>
+
 <script>
-  let allNews = [];
-  let filteredNews = [];
-  let selectedIds = new Set();
-  let currentPage = 1;
-  const itemsPerPage = 10;
-  let editImageFile = null;
-  const STORAGE_BUCKET = 'news-images';
+  let allNews=[], filteredNews=[], selectedIds=new Set(), currentPage=1, itemsPerPage=10, editImgFile=null;
+  const BUCKET='news-images';
 
   document.addEventListener('DOMContentLoaded', loadNews);
 
   async function loadNews() {
     try {
-      const { data, error } = await supabaseClient
-        .from('news')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-
-      allNews = data || [];
+      const {data,error} = await supabaseClient.from('news').select('*').order('created_at',{ascending:false});
+      if(error) throw error;
+      allNews = data||[];
       filteredNews = allNews;
-      updateStats();
-      displayNews();
-    } catch (error) {
-      console.error('Error:', error);
-      document.getElementById('newsTableBody').innerHTML = `
-        <tr><td colspan="7" class="p-8 text-center text-red-600">
-          Error loading news. Please refresh.
-        </td></tr>
-      `;
-    }
-  }
-
-  // Handle edit image selection
-  function handleEditImageSelect(event) {
-    const file = event.target.files[0];
-    if (!file) return;
-
-    // Validate file
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-    if (!validTypes.includes(file.type)) {
-      alert('Please select a valid image file');
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Image must be less than 5MB');
-      return;
-    }
-
-    editImageFile = file;
-
-    // Show preview
-    const reader = new FileReader();
-    reader.onload = function(e) {
-      document.getElementById('editPreviewImg').src = e.target.result;
-      document.getElementById('editImagePreview').classList.remove('hidden');
-    };
-    reader.readAsDataURL(file);
-  }
-
-  function removeEditImage() {
-    editImageFile = null;
-    document.getElementById('editImageFile').value = '';
-    document.getElementById('editImagePreview').classList.add('hidden');
-  }
-
-  async function uploadEditImage() {
-    if (!editImageFile) return null;
-
-    try {
-      const fileExt = editImageFile.name.split('.').pop();
-      const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-
-      const { data, error } = await supabaseClient.storage
-        .from(STORAGE_BUCKET)
-        .upload(fileName, editImageFile, {
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      if (error) throw error;
-
-      const { data: urlData } = supabaseClient.storage
-        .from(STORAGE_BUCKET)
-        .getPublicUrl(fileName);
-
-      return urlData.publicUrl;
-    } catch (error) {
-      console.error('Upload error:', error);
-      throw error;
+      updateStats(); displayNews();
+    } catch(e) {
+      document.getElementById('newsTableBody').innerHTML=`<tr><td colspan="6" style="padding:40px;text-align:center;color:var(--red);">Error loading. Please refresh.</td></tr>`;
     }
   }
 
   function updateStats() {
-    const now = new Date();
-    const thisMonth = allNews.filter(n => {
-      const created = new Date(n.created_at);
-      return created.getMonth() === now.getMonth() && 
-             created.getFullYear() === now.getFullYear();
-    });
-
-    document.getElementById('totalCount').textContent = allNews.length;
-    document.getElementById('breakingCount').textContent = 
-      allNews.filter(n => n.is_breaking).length;
-    document.getElementById('featuredCount').textContent = 
-      allNews.filter(n => n.is_featured).length;
-    document.getElementById('monthCount').textContent = thisMonth.length;
+    const now=new Date();
+    document.getElementById('totalCount').textContent=allNews.length;
+    document.getElementById('breakingCount').textContent=allNews.filter(n=>n.is_breaking).length;
+    document.getElementById('featuredCount').textContent=allNews.filter(n=>n.is_featured).length;
+    document.getElementById('monthCount').textContent=allNews.filter(n=>{const d=new Date(n.created_at);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();}).length;
   }
 
   function displayNews() {
-    const start = (currentPage - 1) * itemsPerPage;
-    const end = start + itemsPerPage;
-    const pageNews = filteredNews.slice(start, end);
-
-    document.getElementById('totalNewsCount').textContent = filteredNews.length;
-    document.getElementById('showingCount').textContent = Math.min(end, filteredNews.length);
-
-    if (pageNews.length === 0) {
-      document.getElementById('newsTableBody').innerHTML = `
-        <tr><td colspan="7" class="p-8 text-center text-gray-500">
-          No news found
-        </td></tr>
-      `;
-      return;
+    const start=(currentPage-1)*itemsPerPage, end=start+itemsPerPage;
+    const page=filteredNews.slice(start,end);
+    document.getElementById('totalNewsCount').textContent=filteredNews.length;
+    document.getElementById('showingCount').textContent=Math.min(end,filteredNews.length);
+    if(!page.length){
+      document.getElementById('newsTableBody').innerHTML=`<tr><td colspan="6" style="padding:40px;text-align:center;color:var(--muted);">No articles found</td></tr>`;
+      updatePagination(); return;
     }
-
-    document.getElementById('newsTableBody').innerHTML = pageNews.map(news => `
-      <tr class="border-t hover:bg-gray-50">
-        <td class="p-3">
-          <input type="checkbox" class="news-checkbox" value="${news.id}" 
-            onchange="updateSelection()" ${selectedIds.has(news.id) ? 'checked' : ''}>
+    document.getElementById('newsTableBody').innerHTML = page.map(n=>`
+      <tr>
+        <td><input type="checkbox" class="news-checkbox" value="${n.id}" onchange="updateSelection()" style="accent-color:var(--red);width:15px;height:15px;" ${selectedIds.has(n.id)?'checked':''}></td>
+        <td class="news-title-cell">
+          <div class="main">${n.title}</div>
+          <div class="preview">${(n.content||'').slice(0,60)}…</div>
         </td>
-        <td class="p-3">
-          <div class="font-medium text-gray-900">${news.title}</div>
-          <div class="text-xs text-gray-500 mt-1">${news.content.substring(0, 60)}...</div>
+        <td><span class="tag cat">${n.category}</span></td>
+        <td style="display:flex;gap:4px;flex-wrap:wrap;padding-top:14px;">
+          ${n.is_breaking?'<span class="tag breaking">Breaking</span>':''}
+          ${n.is_featured?'<span class="tag featured">Featured</span>':''}
+          ${n.source==='facebook'?'<span class="tag fb">FB</span>':''}
         </td>
-        <td class="p-3">
-          <span class="px-2 py-1 bg-blue-100 text-blue-600 rounded text-xs">${news.category}</span>
-        </td>
-        <td class="p-3">
-          <div class="flex gap-1">
-            ${news.is_breaking ? '<span class="px-2 py-1 bg-red-100 text-red-600 rounded text-xs">Breaking</span>' : ''}
-            ${news.is_featured ? '<span class="px-2 py-1 bg-purple-100 text-purple-600 rounded text-xs">Featured</span>' : ''}
-          </div>
-        </td>
-        <td class="p-3 text-sm text-gray-600">
-          ${formatDate(news.created_at)}
-        </td>
-        <td class="p-3 text-sm text-gray-600">
-          ${news.views || 0}
-        </td>
-        <td class="p-3">
-          <div class="flex gap-2">
-            <button onclick="editNews(${news.id})" 
-              class="text-blue-600 hover:text-blue-800" title="Edit">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-              </svg>
-            </button>
-            <button onclick="deleteNews(${news.id})" 
-              class="text-red-600 hover:text-red-800" title="Delete">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-              </svg>
-            </button>
-          </div>
-        </td>
-      </tr>
-    `).join('');
-
+        <td style="font-size:12px;color:var(--muted);">${timeAgo(n.created_at)}</td>
+        <td><div style="display:flex;gap:6px;">
+          <button class="action-btn edit" onclick="openEdit(${n.id})">Edit</button>
+          <button class="action-btn delete" onclick="deleteNews(${n.id})">Delete</button>
+        </div></td>
+      </tr>`).join('');
     updatePagination();
   }
 
   function filterNews() {
-    const search = document.getElementById('searchInput').value.toLowerCase();
-    const category = document.getElementById('categoryFilter').value;
-    const status = document.getElementById('statusFilter').value;
-
-    filteredNews = allNews.filter(news => {
-      const matchSearch = !search || 
-        news.title.toLowerCase().includes(search) ||
-        news.content.toLowerCase().includes(search);
-      const matchCategory = !category || news.category === category;
-      const matchStatus = !status || 
-        (status === 'breaking' && news.is_breaking) ||
-        (status === 'featured' && news.is_featured);
-
-      return matchSearch && matchCategory && matchStatus;
+    const s=document.getElementById('searchInput').value.toLowerCase();
+    const c=document.getElementById('categoryFilter').value;
+    const st=document.getElementById('statusFilter').value;
+    filteredNews=allNews.filter(n=>{
+      const ms=!s||n.title.toLowerCase().includes(s)||n.content.toLowerCase().includes(s);
+      const mc=!c||n.category===c;
+      const mst=!st||(st==='breaking'&&n.is_breaking)||(st==='featured'&&n.is_featured)||(st==='facebook'&&n.source==='facebook');
+      return ms&&mc&&mst;
     });
-
-    currentPage = 1;
-    displayNews();
+    currentPage=1; displayNews();
   }
 
-  function clearFilters() {
-    document.getElementById('searchInput').value = '';
-    document.getElementById('categoryFilter').value = '';
-    document.getElementById('statusFilter').value = '';
-    filterNews();
-  }
+  function clearFilters(){document.getElementById('searchInput').value='';document.getElementById('categoryFilter').value='';document.getElementById('statusFilter').value='';filterNews();}
 
   function updateSelection() {
     selectedIds.clear();
-    document.querySelectorAll('.news-checkbox:checked').forEach(cb => {
-      selectedIds.add(parseInt(cb.value));
-    });
+    document.querySelectorAll('.news-checkbox:checked').forEach(cb=>selectedIds.add(parseInt(cb.value)));
+    const bar=document.getElementById('bulkBar');
+    if(selectedIds.size>0){bar.style.display='flex';document.getElementById('selectedCount').textContent=selectedIds.size+' selected';}
+    else bar.style.display='none';
+  }
+  function toggleSelectAll(){const c=document.getElementById('selectAll').checked;document.querySelectorAll('.news-checkbox').forEach(cb=>cb.checked=c);updateSelection();}
+  function clearSelection(){selectedIds.clear();document.querySelectorAll('.news-checkbox').forEach(cb=>cb.checked=false);document.getElementById('selectAll').checked=false;updateSelection();}
 
-    const bulkActions = document.getElementById('bulkActions');
-    if (selectedIds.size > 0) {
-      bulkActions.classList.remove('hidden');
-      document.getElementById('selectedCount').textContent = `${selectedIds.size} selected`;
-    } else {
-      bulkActions.classList.add('hidden');
-    }
+  async function bulkToggleBreaking(){if(!confirm(`Toggle breaking for ${selectedIds.size} articles?`))return;for(const id of selectedIds){const n=allNews.find(x=>x.id===id);await supabaseClient.from('news').update({is_breaking:!n.is_breaking}).eq('id',id);}await loadNews();clearSelection();}
+  async function bulkToggleFeatured(){if(!confirm(`Toggle featured for ${selectedIds.size} articles?`))return;for(const id of selectedIds){const n=allNews.find(x=>x.id===id);await supabaseClient.from('news').update({is_featured:!n.is_featured}).eq('id',id);}await loadNews();clearSelection();}
+  async function bulkDelete(){if(!confirm(`Delete ${selectedIds.size} articles? Cannot be undone!`))return;for(const id of selectedIds){await supabaseClient.from('news').delete().eq('id',id);}await loadNews();clearSelection();}
+
+  function openEdit(id){
+    const n=allNews.find(x=>x.id===id); if(!n) return;
+    document.getElementById('editId').value=n.id;
+    document.getElementById('editTitle').value=n.title;
+    document.getElementById('editCategory').value=n.category;
+    document.getElementById('editContent').value=n.content;
+    document.getElementById('editImageUrl').value=n.image_url||'';
+    document.getElementById('editBreaking').checked=n.is_breaking;
+    document.getElementById('editFeatured').checked=n.is_featured;
+    const ciw=document.getElementById('currentImgWrap');
+    if(n.image_url){document.getElementById('currentImg').src=n.image_url;ciw.style.display='block';}else ciw.style.display='none';
+    editImgFile=null; document.getElementById('editImageFile').value=''; document.getElementById('editImgPreviewWrap').style.display='none';
+    document.getElementById('editModal').style.display='flex';
+  }
+  function closeEditModal(){document.getElementById('editModal').style.display='none';}
+  function handleEditImg(e){const f=e.target.files[0];if(!f)return;editImgFile=f;const r=new FileReader();r.onload=ev=>{document.getElementById('editImgPreview').src=ev.target.result;document.getElementById('editImgPreviewWrap').style.display='block';};r.readAsDataURL(f);}
+
+  async function saveEdit(){
+    const id=document.getElementById('editId').value;
+    const updates={title:document.getElementById('editTitle').value,category:document.getElementById('editCategory').value,content:document.getElementById('editContent').value,is_breaking:document.getElementById('editBreaking').checked,is_featured:document.getElementById('editFeatured').checked};
+    if(editImgFile){
+      const ext=editImgFile.name.split('.').pop(), fn=`${Date.now()}.${ext}`;
+      const{error:ue}=await supabaseClient.storage.from(BUCKET).upload(fn,editImgFile,{cacheControl:'3600',upsert:false});
+      if(!ue){const{data:ud}=supabaseClient.storage.from(BUCKET).getPublicUrl(fn);updates.image_url=ud.publicUrl;}
+    } else updates.image_url=document.getElementById('editImageUrl').value;
+    const{error}=await supabaseClient.from('news').update(updates).eq('id',id);
+    if(error){alert('Error: '+error.message);return;}
+    closeEditModal(); await loadNews();
   }
 
-  function toggleSelectAll() {
-    const checked = document.getElementById('selectAll').checked;
-    document.querySelectorAll('.news-checkbox').forEach(cb => {
-      cb.checked = checked;
-    });
-    updateSelection();
-  }
+  async function deleteNews(id){if(!confirm('Delete this article?'))return;const{error}=await supabaseClient.from('news').delete().eq('id',id);if(error){alert('Error: '+error.message);return;}await loadNews();}
 
-  function clearSelection() {
-    selectedIds.clear();
-    document.querySelectorAll('.news-checkbox').forEach(cb => cb.checked = false);
-    document.getElementById('selectAll').checked = false;
-    updateSelection();
-  }
+  function updatePagination(){const t=Math.ceil(filteredNews.length/itemsPerPage);document.getElementById('prevBtn').disabled=currentPage===1;document.getElementById('nextBtn').disabled=currentPage>=t;}
+  function previousPage(){if(currentPage>1){currentPage--;displayNews();window.scrollTo(0,0);}}
+  function nextPage(){if(currentPage<Math.ceil(filteredNews.length/itemsPerPage)){currentPage++;displayNews();window.scrollTo(0,0);}}
 
-  async function bulkToggleBreaking() {
-    if (!confirm(`Toggle breaking status for ${selectedIds.size} articles?`)) return;
-
-    try {
-      for (const id of selectedIds) {
-        const news = allNews.find(n => n.id === id);
-        await supabaseClient
-          .from('news')
-          .update({ is_breaking: !news.is_breaking })
-          .eq('id', id);
-      }
-      await loadNews();
-      clearSelection();
-    } catch (error) {
-      alert('Error: ' + error.message);
-    }
-  }
-
-  async function bulkToggleFeatured() {
-    if (!confirm(`Toggle featured status for ${selectedIds.size} articles?`)) return;
-
-    try {
-      for (const id of selectedIds) {
-        const news = allNews.find(n => n.id === id);
-        await supabaseClient
-          .from('news')
-          .update({ is_featured: !news.is_featured })
-          .eq('id', id);
-      }
-      await loadNews();
-      clearSelection();
-    } catch (error) {
-      alert('Error: ' + error.message);
-    }
-  }
-
-  async function bulkDelete() {
-    if (!confirm(`Delete ${selectedIds.size} articles? This cannot be undone!`)) return;
-
-    try {
-      for (const id of selectedIds) {
-        await supabaseClient.from('news').delete().eq('id', id);
-      }
-      await loadNews();
-      clearSelection();
-    } catch (error) {
-      alert('Error: ' + error.message);
-    }
-  }
-
-  function editNews(id) {
-    const news = allNews.find(n => n.id === id);
-    if (!news) return;
-
-    document.getElementById('editId').value = news.id;
-    document.getElementById('editTitle').value = news.title;
-    document.getElementById('editCategory').value = news.category;
-    document.getElementById('editContent').value = news.content;
-    document.getElementById('editImageUrl').value = news.image_url || '';
-    document.getElementById('editBreaking').checked = news.is_breaking;
-    document.getElementById('editFeatured').checked = news.is_featured;
-
-    // Show current image if exists
-    const currentImagePreview = document.getElementById('currentImagePreview');
-    const currentImage = document.getElementById('currentImage');
-    if (news.image_url) {
-      currentImage.src = news.image_url;
-      currentImagePreview.classList.remove('hidden');
-    } else {
-      currentImagePreview.classList.add('hidden');
-    }
-
-    // Reset new image upload
-    editImageFile = null;
-    document.getElementById('editImageFile').value = '';
-    document.getElementById('editImagePreview').classList.add('hidden');
-
-    document.getElementById('editModal').classList.remove('hidden');
-  }
-
-  function closeEditModal() {
-    document.getElementById('editModal').classList.add('hidden');
-  }
-
-  document.getElementById('editForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const id = document.getElementById('editId').value;
-    const updates = {
-      title: document.getElementById('editTitle').value,
-      category: document.getElementById('editCategory').value,
-      content: document.getElementById('editContent').value,
-      is_breaking: document.getElementById('editBreaking').checked,
-      is_featured: document.getElementById('editFeatured').checked
-    };
-
-    try {
-      // Upload new image if selected
-      if (editImageFile) {
-        const imageUrl = await uploadEditImage();
-        updates.image_url = imageUrl;
-      } else {
-        // Keep existing image URL
-        updates.image_url = document.getElementById('editImageUrl').value;
-      }
-
-      const { error } = await supabaseClient
-        .from('news')
-        .update(updates)
-        .eq('id', id);
-
-      if (error) throw error;
-
-      closeEditModal();
-      await loadNews();
-      alert('News updated successfully!');
-    } catch (error) {
-      alert('Error: ' + error.message);
-    }
-  });
-
-  async function deleteNews(id) {
-    if (!confirm('Delete this news article? This cannot be undone!')) return;
-
-    try {
-      const { error } = await supabaseClient
-        .from('news')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-
-      await loadNews();
-    } catch (error) {
-      alert('Error: ' + error.message);
-    }
-  }
-
-  function updatePagination() {
-    const totalPages = Math.ceil(filteredNews.length / itemsPerPage);
-    document.getElementById('prevBtn').disabled = currentPage === 1;
-    document.getElementById('nextBtn').disabled = currentPage >= totalPages;
-  }
-
-  function previousPage() {
-    if (currentPage > 1) {
-      currentPage--;
-      displayNews();
-      window.scrollTo(0, 0);
-    }
-  }
-
-  function nextPage() {
-    const totalPages = Math.ceil(filteredNews.length / itemsPerPage);
-    if (currentPage < totalPages) {
-      currentPage++;
-      displayNews();
-      window.scrollTo(0, 0);
-    }
-  }
-
-  function formatDate(dateString) {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  }
-
-  async function logout() {
-    await supabaseClient.auth.signOut();
-    window.location.replace("login.html");
-  }
+  function timeAgo(d){const s=(Date.now()-new Date(d))/1000;if(s<60)return'Just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';}
+  async function logout(){await supabaseClient.auth.signOut();window.location.replace('login.html');}
 </script>
-
 </body>
 </html>

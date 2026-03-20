@@ -1,554 +1,405 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Post News | Nagarkot Network Admin</title>
-
-  <!-- Tailwind CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-
-  <!-- Supabase -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <meta http-equiv="Cache-Control" content="no-store"/>
+  <style>
+    :root { --red:#C0272D;--red-dk:#8B1A1E;--cream:#FDF8F3;--ink:#1A1410;--muted:#6B6460;--border:#E8E0D8;--gold:#D4A853; }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    html,body{width:100%;}
+body{font-family:'DM Sans',sans-serif;background:var(--cream);color:var(--ink);}
+    h1,h2,h3{font-family:'Playfair Display',serif;}
 
-  <!-- No cache -->
-  <meta http-equiv="Cache-Control" content="no-store" />
-  <meta http-equiv="Pragma" content="no-cache" />
-  <meta http-equiv="Expires" content="0" />
+    /* Sidebar */
+    .sidebar{width:240px;background:var(--ink);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:40;}
+    .sidebar-logo{padding:28px 24px 20px;border-bottom:1px solid rgba(255,255,255,0.08);}
+    .sidebar-logo .nn{font-family:'Playfair Display',serif;font-size:20px;font-weight:900;color:#fff;line-height:1.1;}
+    .red-dot{display:inline-block;width:7px;height:7px;background:var(--red);border-radius:50%;margin-left:2px;vertical-align:middle;margin-bottom:3px;}
+    .sidebar-logo .sub{font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:1.5px;margin-top:4px;}
+    nav.sidebar-nav{flex:1;padding:16px 12px;overflow-y:auto;}
+    .nav-label{font-size:9px;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.25);padding:12px 12px 6px;}
+    .nav-link{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;color:rgba(255,255,255,0.55);font-size:13.5px;font-weight:500;text-decoration:none;transition:all 0.18s;margin-bottom:2px;}
+    .nav-link:hover{background:rgba(255,255,255,0.07);color:#fff;}
+    .nav-link.active{background:var(--red);color:#fff;}
+    .nav-link svg{width:17px;height:17px;flex-shrink:0;}
+    .fb-badge{margin-left:auto;background:#1877F2;color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:20px;}
+    .sidebar-footer{padding:16px 12px;border-top:1px solid rgba(255,255,255,0.08);}
+    .logout-btn{display:flex;align-items:center;gap:10px;width:100%;padding:10px 12px;border-radius:8px;background:rgba(192,39,45,0.15);color:#F87171;font-size:13px;font-weight:500;border:none;cursor:pointer;transition:all 0.18s;}
+    .logout-btn:hover{background:rgba(192,39,45,0.3);}
+
+    /* Main */
+    .main-wrap{margin-left:240px;min-height:100vh;display:flex;flex-direction:column;flex:1;min-width:0;width:calc(100% - 240px);}
+    .topbar{background:#fff;border-bottom:1px solid var(--border);padding:0 32px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:30;}
+    .topbar-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;}
+    .page-content{flex:1;padding:32px;}
+
+    /* Form card */
+    .form-layout{display:grid;grid-template-columns:1fr 320px;gap:24px;max-width:1100px;}
+    .form-card{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+    .form-card-header{padding:20px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;}
+    .form-card-header h2{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;}
+    .form-card-body{padding:28px;}
+    .field{margin-bottom:22px;}
+    .field label{display:block;font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+    .field input, .field select, .field textarea{
+      width:100%;padding:11px 14px;
+      border:1.5px solid var(--border);border-radius:10px;
+      font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);
+      background:#fff;transition:border-color 0.2s,box-shadow 0.2s;outline:none;
+      resize:vertical;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(192,39,45,0.08);}
+    .field input::placeholder, .field textarea::placeholder{color:#C4BAB6;}
+    .field .hint{font-size:11.5px;color:var(--muted);margin-top:5px;}
+
+    /* Image upload zone */
+    .upload-zone{
+      border:2px dashed var(--border);border-radius:10px;
+      padding:32px;text-align:center;cursor:pointer;
+      transition:all 0.2s;background:#FAFAF8;
+    }
+    .upload-zone:hover{border-color:var(--red);background:#FFF8F8;}
+    .upload-zone .icon{width:40px;height:40px;color:var(--muted);margin:0 auto 10px;}
+    .upload-zone p{font-size:13px;color:var(--muted);}
+    .upload-zone strong{color:var(--red);}
+
+    /* Progress */
+    .progress-wrap{margin-top:12px;display:none;}
+    .progress-bar-track{background:#F0EBE5;border-radius:99px;height:6px;overflow:hidden;}
+    .progress-bar-fill{background:var(--red);height:100%;transition:width 0.3s;width:0%;}
+
+    /* Image preview */
+    .image-preview{display:none;margin-top:14px;position:relative;border-radius:10px;overflow:hidden;}
+    .image-preview img{width:100%;height:200px;object-fit:cover;display:block;}
+    .image-preview .remove-btn{
+      position:absolute;top:8px;right:8px;
+      background:rgba(0,0,0,0.6);color:#fff;border:none;
+      border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;
+    }
+
+    /* Checkboxes */
+    .checkbox-group{display:flex;flex-direction:column;gap:12px;}
+    .checkbox-item{display:flex;align-items:flex-start;gap:12px;padding:14px;border:1.5px solid var(--border);border-radius:10px;cursor:pointer;transition:border-color 0.18s;}
+    .checkbox-item:hover{border-color:var(--ink);}
+    .checkbox-item input[type=checkbox]{width:18px;height:18px;margin-top:1px;accent-color:var(--red);cursor:pointer;flex-shrink:0;}
+    .checkbox-item .cb-label{font-size:13.5px;font-weight:600;}
+    .checkbox-item .cb-desc{font-size:11.5px;color:var(--muted);margin-top:2px;}
+
+    /* Sidebar panel */
+    .side-panel{display:flex;flex-direction:column;gap:16px;}
+    .side-card{background:#fff;border:1px solid var(--border);border-radius:14px;overflow:hidden;}
+    .side-card-header{padding:14px 20px;border-bottom:1px solid var(--border);font-size:13px;font-weight:700;color:var(--ink);}
+    .side-card-body{padding:16px 20px;}
+
+    /* Status badge */
+    .status-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;}
+    .status-badge.draft{background:#F3EDE8;color:var(--muted);}
+    .status-badge.ready{background:#F0FDF4;color:#16A34A;}
+
+    /* Action buttons */
+    .btn-publish{width:100%;padding:13px;background:var(--red);color:#fff;border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.18s;display:flex;align-items:center;justify-content:center;gap:8px;}
+    .btn-publish:hover{background:var(--red-dk);}
+    .btn-draft{width:100%;padding:11px;background:#fff;color:var(--ink);border:1.5px solid var(--border);border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.18s;margin-top:10px;}
+    .btn-draft:hover{border-color:var(--ink);}
+    .btn-reset{width:100%;padding:11px;background:transparent;color:var(--muted);border:none;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;margin-top:6px;}
+    .btn-reset:hover{color:var(--red);}
+
+    /* Status message */
+    .status-msg{display:none;padding:12px 16px;border-radius:10px;font-size:13px;font-weight:500;margin-top:14px;}
+    .status-msg.error{background:#FEF2F2;color:#B91C1C;border:1px solid #FECACA;}
+    .status-msg.success{background:#F0FDF4;color:#14532D;border:1px solid #BBF7D0;}
+    .status-msg.loading{background:#EFF6FF;color:#1E40AF;border:1px solid #BFDBFE;}
+
+    @media(max-width:900px){.form-layout{grid-template-columns:1fr;}}
+  </style>
 </head>
+<body>
 
-<body class="bg-slate-100">
-
-<!-- 🔐 AUTH GUARD -->
 <script>
-  const SUPABASE_URL = "https://waqfebkbgyfhybompnsm.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndhcWZlYmtiZ3lmaHlib21wbnNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5MDE5MzQsImV4cCI6MjA4MTQ3NzkzNH0.0WttHhOGKaP60ixIkT1MnqV4jbxgteN68ez-nCYU16c";
-
-  const { createClient } = supabase;
-  const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-  supabaseClient.auth.getSession().then(({ data }) => {
-    if (!data.session) {
-      window.location.replace("login.html");
-    }
-  });
-
-  supabaseClient.auth.onAuthStateChange((event, session) => {
-    if (!session) {
-      window.location.replace("login.html");
-    }
-  });
+  const SUPABASE_URL="https://waqfebkbgyfhybompnsm.supabase.co";
+  const SUPABASE_ANON_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndhcWZlYmtiZ3lmaHlib21wbnNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5MDE5MzQsImV4cCI6MjA4MTQ3NzkzNH0.0WttHhOGKaP60ixIkT1MnqV4jbxgteN68ez-nCYU16c";
+  const{createClient}=supabase;
+  const supabaseClient=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  supabaseClient.auth.getSession().then(({data})=>{if(!data.session)window.location.replace("login.html");});
+  supabaseClient.auth.onAuthStateChange((e,s)=>{if(!s)window.location.replace("login.html");});
 </script>
 
-<!-- MAIN WRAPPER -->
-<div class="flex min-h-screen">
+<div style="display:flex;min-height:100vh;width:100%;">
 
-  <!-- SIDEBAR -->
- <!-- Sidebar -->
-  <aside class="w-64 bg-gradient-to-b from-slate-900 to-slate-800 text-white hidden md:flex flex-col shadow-2xl">
-    <div class="p-6 border-b border-slate-700">
-      <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-        Nagarkot Network
-      </h1>
-      <p class="text-xs text-slate-400 mt-1">Admin Panel</p>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="nn">नगरकोट<span class="red-dot"></span><br>Network</div>
+      <div class="sub">Admin Panel</div>
     </div>
-
-    <nav class="flex-1 p-4 space-y-2">
-      <a href="dashboard.html" class="flex items-center gap-3 px-4 py-3 rounded-lg bg-slate-800 shadow-lg">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
-        </svg>
-        <span class="font-medium">Dashboard</span>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Main</div>
+      <a href="dashboard.html" class="nav-link">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zm10 0a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"/></svg>
+        Dashboard
       </a>
-      
-      <a href="post-news.html" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-700 transition">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-        </svg>
-        <span>Post News</span>
+      <a href="post-news.html" class="nav-link active">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        Post News
       </a>
-      
-      <a href="all-news.html" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-700 transition">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path>
-        </svg>
-        <span>All News</span>
+      <a href="all-news.html" class="nav-link">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"/></svg>
+        All News
       </a>
-      
-      <a href="categories.html" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-700 transition">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
-        </svg>
-        <span>Categories</span>
+      <a href="categories.html" class="nav-link">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+        Categories
       </a>
-      
-      <a href="settings.html" class="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-slate-700 transition">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-          <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-        </svg>
-        <span>Settings</span>
+      <div class="nav-label" style="margin-top:8px;">Integrations</div>
+      <a href="settings.html" class="nav-link">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+        Facebook Sync
+        <span class="fb-badge">NEW</span>
+      </a>
+      <a href="settings.html" class="nav-link">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        Settings
       </a>
     </nav>
-
-    <div class="p-4 border-t border-slate-700">
-      <button onclick="logout()" class="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 py-3 rounded-lg transition font-medium">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-        </svg>
+    <div class="sidebar-footer">
+      <button onclick="logout()" class="logout-btn">
+        <svg style="width:16px;height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
         Logout
       </button>
     </div>
   </aside>
 
-  <!-- MAIN CONTENT -->
-  <div class="flex-1">
-
-    <!-- TOP BAR -->
-    <header class="bg-white shadow p-4 flex justify-between items-center">
-      <h1 class="text-xl font-semibold">Post News</h1>
-      <a href="dashboard.html" class="text-blue-600 hover:underline text-sm">← Back to Dashboard</a>
+  <!-- Main -->
+  <div class="main-wrap">
+    <header class="topbar">
+      <div class="topbar-title">Post News</div>
+      <a href="dashboard.html" style="font-size:13px;color:var(--red);font-weight:600;text-decoration:none;">← Back to Dashboard</a>
     </header>
 
-    <!-- CONTENT -->
-    <main class="p-6">
+    <main class="page-content">
+      <div class="form-layout">
 
-      <div class="max-w-4xl mx-auto bg-white rounded shadow-lg p-8">
-
-        <h2 class="text-2xl font-bold mb-6 flex items-center gap-2">
-          <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-          </svg>
-          Create New Article
-        </h2>
-
-        <form id="newsForm" class="space-y-6">
-
-          <!-- Title -->
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">
-              News Title (Nepali) *
-            </label>
-            <input
-              id="title"
-              type="text"
-              placeholder="समाचारको शीर्षक लेख्नुहोस्..."
-              class="w-full border border-gray-300 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-
-          <!-- Category -->
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Category *
-            </label>
-            <select
-              id="category"
-              class="w-full border border-gray-300 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            >
-              <option value="">Select Category</option>
-              <option value="समाचार">समाचार (News)</option>
-              <option value="राजनीति">राजनीति (Politics)</option>
-              <option value="शिक्षा">शिक्षा (Education)</option>
-              <option value="प्रविधि">प्रविधि (Technology)</option>
-              <option value="खेलकुद">खेलकुद (Sports)</option>
-              <option value="अर्थ">अर्थ (Economy)</option>
-              <option value="मनोरञ्जन">मनोरञ्जन (Entertainment)</option>
-              <option value="स्वास्थ्य">स्वास्थ्य (Health)</option>
-            </select>
-          </div>
-
-          <!-- Content -->
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">
-              News Content (Nepali) *
-            </label>
-            <textarea
-              id="content"
-              rows="10"
-              placeholder="समाचारको पूर्ण विवरण यहाँ लेख्नुहोस्..."
-              class="w-full border border-gray-300 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            ></textarea>
-            <p class="text-xs text-gray-500 mt-1">Minimum 50 characters</p>
-          </div>
-
-          <!-- Image Upload -->
-          <div>
-            <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Featured Image *
-            </label>
-            
-            <!-- Upload Button -->
-            <div class="flex items-center gap-4">
-              <label for="imageFile" class="cursor-pointer bg-blue-50 hover:bg-blue-100 text-blue-600 px-6 py-3 rounded-lg border-2 border-blue-200 border-dashed transition flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                </svg>
-                <span id="uploadBtnText">Choose Image</span>
-              </label>
-              <input
-                type="file"
-                id="imageFile"
-                accept="image/jpeg,image/jpg,image/png,image/webp"
-                class="hidden"
-                onchange="handleImageSelect(event)"
-              />
-              <button
-                type="button"
-                id="removeImageBtn"
-                onclick="removeImage()"
-                class="hidden bg-red-50 hover:bg-red-100 text-red-600 px-4 py-3 rounded-lg transition"
-              >
-                Remove
-              </button>
+        <!-- Left: form -->
+        <div>
+          <div class="form-card">
+            <div class="form-card-header">
+              <svg style="width:22px;height:22px;color:var(--red);" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+              <h2>Create New Article</h2>
             </div>
-            <p class="text-xs text-gray-500 mt-2">Supported formats: JPG, PNG, WebP (Max 5MB)</p>
-            
-            <!-- Upload Progress -->
-            <div id="uploadProgress" class="hidden mt-3">
-              <div class="flex items-center gap-2 mb-1">
-                <div class="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden">
-                  <div id="progressBar" class="bg-blue-600 h-2 transition-all duration-300" style="width: 0%"></div>
-                </div>
-                <span id="progressText" class="text-sm text-gray-600">0%</span>
+            <div class="form-card-body">
+
+              <div class="field">
+                <label>News Title (Nepali) *</label>
+                <input id="title" type="text" placeholder="समाचारको शीर्षक लेख्नुहोस्..." required/>
               </div>
-              <p id="uploadStatus" class="text-xs text-gray-500"></p>
+
+              <div class="field">
+                <label>Category *</label>
+                <select id="category" required>
+                  <option value="">Select Category</option>
+                  <option value="समाचार">समाचार (News)</option>
+                  <option value="राजनीति">राजनीति (Politics)</option>
+                  <option value="शिक्षा">शिक्षा (Education)</option>
+                  <option value="प्रविधि">प्रविधि (Technology)</option>
+                  <option value="खेलकुद">खेलकुद (Sports)</option>
+                  <option value="अर्थ">अर्थ (Economy)</option>
+                  <option value="मनोरञ्जन">मनोरञ्जन (Entertainment)</option>
+                  <option value="स्वास्थ्य">स्वास्थ्य (Health)</option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label>News Content (Nepali) *</label>
+                <textarea id="content" rows="10" placeholder="समाचारको पूर्ण विवरण यहाँ लेख्नुहोस्..." required></textarea>
+                <div class="hint">Minimum 50 characters required</div>
+              </div>
+
+              <div class="field">
+                <label>Featured Image</label>
+                <div class="upload-zone" onclick="document.getElementById('imageFile').click()">
+                  <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                  <p><strong>Click to upload</strong> or drag and drop</p>
+                  <p style="font-size:11px;margin-top:4px;">JPG, PNG, WebP — Max 5MB</p>
+                </div>
+                <input type="file" id="imageFile" accept="image/jpeg,image/jpg,image/png,image/webp" class="hidden" style="display:none;" onchange="handleImageSelect(event)"/>
+
+                <div class="progress-wrap" id="progressWrap">
+                  <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px;">
+                    <span id="uploadStatus">Uploading…</span>
+                    <span id="progressText">0%</span>
+                  </div>
+                  <div class="progress-bar-track"><div class="progress-bar-fill" id="progressBar"></div></div>
+                </div>
+
+                <div class="image-preview" id="imagePreview">
+                  <img id="previewImg" src="" alt="Preview"/>
+                  <button class="remove-btn" onclick="removeImage()">✕ Remove</button>
+                </div>
+                <input type="hidden" id="image_url"/>
+              </div>
+
             </div>
           </div>
+        </div>
 
-          <!-- Image Preview -->
-          <div id="imagePreview" class="hidden">
-            <label class="block text-sm font-semibold text-gray-700 mb-2">
-              Image Preview
-            </label>
-            <div class="relative inline-block">
-              <img id="previewImg" src="" alt="Preview" class="max-w-full h-64 object-cover rounded-lg border-2 border-gray-200">
-              <button
-                type="button"
-                onclick="removeImage()"
-                class="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-2 rounded-full shadow-lg transition"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path d="M6 18L18 6M6 6l12 12"></path>
-                </svg>
+        <!-- Right: options -->
+        <div class="side-panel">
+          <div class="side-card">
+            <div class="side-card-header">Publish Options</div>
+            <div class="side-card-body">
+              <div style="margin-bottom:16px;">
+                <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;">Status</div>
+                <span class="status-badge draft" id="statusBadge">● Draft</span>
+              </div>
+              <button class="btn-publish" onclick="postNews()">
+                <svg style="width:16px;height:16px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                Publish Now
               </button>
+              <button class="btn-draft" onclick="saveDraft()">💾 Save Draft</button>
+              <button class="btn-reset" onclick="resetForm()">Reset form</button>
+              <div class="status-msg" id="statusMsg"></div>
             </div>
           </div>
-          
-          <input type="hidden" id="image_url" />
 
-          <!-- Additional Options -->
-          <div class="border-t pt-6 space-y-4">
-            <h3 class="font-semibold text-gray-700">Additional Options</h3>
-
-            <label class="flex items-center gap-3 cursor-pointer">
-              <input id="breaking" type="checkbox" class="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500" />
-              <span class="text-sm font-medium">
-                Mark as Breaking News
-                <span class="text-xs text-gray-500 block">This will appear in the breaking news ticker</span>
-              </span>
-            </label>
-
-            <label class="flex items-center gap-3 cursor-pointer">
-              <input id="featured" type="checkbox" class="w-5 h-5 text-blue-600 rounded focus:ring-2 focus:ring-blue-500" />
-              <span class="text-sm font-medium">
-                Featured Article
-                <span class="text-xs text-gray-500 block">Display prominently on homepage</span>
-              </span>
-            </label>
+          <div class="side-card">
+            <div class="side-card-header">Article Flags</div>
+            <div class="side-card-body">
+              <div class="checkbox-group">
+                <label class="checkbox-item">
+                  <input type="checkbox" id="breaking"/>
+                  <div>
+                    <div class="cb-label">🔴 Breaking News</div>
+                    <div class="cb-desc">Appears in the breaking news ticker</div>
+                  </div>
+                </label>
+                <label class="checkbox-item">
+                  <input type="checkbox" id="featured"/>
+                  <div>
+                    <div class="cb-label">⭐ Featured Article</div>
+                    <div class="cb-desc">Displayed prominently on homepage</div>
+                  </div>
+                </label>
+              </div>
+            </div>
           </div>
 
-          <!-- Status Message -->
-          <div id="statusMsg" class="hidden p-4 rounded-lg"></div>
-
-          <!-- Action Buttons -->
-          <div class="flex gap-4 pt-4">
-            <button
-              type="submit"
-              class="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition font-semibold flex items-center justify-center gap-2"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-              Publish News
-            </button>
-
-            <button
-              type="button"
-              onclick="saveDraft()"
-              class="bg-gray-200 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-300 transition font-semibold flex items-center justify-center gap-2"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
-              </svg>
-              Save Draft
-            </button>
-
-            <button
-              type="button"
-              onclick="resetForm()"
-              class="bg-red-100 text-red-600 px-6 py-3 rounded-lg hover:bg-red-200 transition font-semibold"
-            >
-              Reset
-            </button>
+          <div class="side-card">
+            <div class="side-card-header">Tips</div>
+            <div class="side-card-body" style="font-size:12.5px;color:var(--muted);line-height:1.6;">
+              <p>• Write titles in Nepali (देवनागरी)</p>
+              <p style="margin-top:6px;">• Content should be at least 50 characters</p>
+              <p style="margin-top:6px;">• Add a featured image for better engagement</p>
+              <p style="margin-top:6px;">• Check "Breaking" for urgent stories</p>
+            </div>
           </div>
-
-        </form>
-
+        </div>
       </div>
-
     </main>
   </div>
 </div>
 
-<!-- SCRIPTS -->
 <script>
   let selectedImageFile = null;
   let uploadedImageUrl = null;
-
-  // Initialize storage bucket name
   const STORAGE_BUCKET = 'news-images';
 
-  // Handle image file selection
-  function handleImageSelect(event) {
-    const file = event.target.files[0];
+  function handleImageSelect(e) {
+    const file = e.target.files[0];
     if (!file) return;
-
-    // Validate file type
-    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-    if (!validTypes.includes(file.type)) {
-      alert('Please select a valid image file (JPG, PNG, or WebP)');
-      event.target.value = '';
-      return;
-    }
-
-    // Validate file size (5MB max)
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Image size must be less than 5MB');
-      event.target.value = '';
-      return;
-    }
-
+    if (!['image/jpeg','image/jpg','image/png','image/webp'].includes(file.type)) { alert('Please select JPG, PNG, or WebP'); return; }
+    if (file.size > 5*1024*1024) { alert('Max 5MB'); return; }
     selectedImageFile = file;
-
-    // Show preview
     const reader = new FileReader();
-    reader.onload = function(e) {
-      document.getElementById('previewImg').src = e.target.result;
-      document.getElementById('imagePreview').classList.remove('hidden');
-      document.getElementById('uploadBtnText').textContent = file.name;
-      document.getElementById('removeImageBtn').classList.remove('hidden');
+    reader.onload = ev => {
+      document.getElementById('previewImg').src = ev.target.result;
+      document.getElementById('imagePreview').style.display = 'block';
     };
     reader.readAsDataURL(file);
+    document.getElementById('statusBadge').textContent = '● Ready';
+    document.getElementById('statusBadge').className = 'status-badge ready';
   }
 
-  // Remove selected image
   function removeImage() {
-    selectedImageFile = null;
-    uploadedImageUrl = null;
+    selectedImageFile = null; uploadedImageUrl = null;
     document.getElementById('imageFile').value = '';
-    document.getElementById('imagePreview').classList.add('hidden');
-    document.getElementById('uploadBtnText').textContent = 'Choose Image';
-    document.getElementById('removeImageBtn').classList.add('hidden');
+    document.getElementById('imagePreview').style.display = 'none';
     document.getElementById('image_url').value = '';
-    document.getElementById('uploadProgress').classList.add('hidden');
+    document.getElementById('progressWrap').style.display = 'none';
   }
 
-  // Upload image to Supabase Storage
   async function uploadImage() {
     if (!selectedImageFile) return null;
-
-    try {
-      // Show progress
-      const progressDiv = document.getElementById('uploadProgress');
-      const progressBar = document.getElementById('progressBar');
-      const progressText = document.getElementById('progressText');
-      const uploadStatus = document.getElementById('uploadStatus');
-      
-      progressDiv.classList.remove('hidden');
-      uploadStatus.textContent = 'Uploading image...';
-      
-      // Simulate progress (Supabase doesn't provide real progress)
-      let progress = 0;
-      const progressInterval = setInterval(() => {
-        progress += 10;
-        if (progress <= 90) {
-          progressBar.style.width = progress + '%';
-          progressText.textContent = progress + '%';
-        }
-      }, 100);
-
-      // Create unique filename
-      const fileExt = selectedImageFile.name.split('.').pop();
-      const fileName = `${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`;
-      const filePath = `${fileName}`;
-
-      // Upload to Supabase Storage
-      const { data, error } = await supabaseClient.storage
-        .from(STORAGE_BUCKET)
-        .upload(filePath, selectedImageFile, {
-          cacheControl: '3600',
-          upsert: false
-        });
-
-      clearInterval(progressInterval);
-
-      if (error) {
-        // If bucket doesn't exist, show helpful error
-        if (error.message.includes('not found')) {
-          throw new Error('Storage bucket not found. Please create "news-images" bucket in Supabase Storage.');
-        }
-        throw error;
-      }
-
-      // Complete progress
-      progressBar.style.width = '100%';
-      progressText.textContent = '100%';
-      uploadStatus.textContent = 'Upload complete!';
-
-      // Get public URL
-      const { data: urlData } = supabaseClient.storage
-        .from(STORAGE_BUCKET)
-        .getPublicUrl(filePath);
-
-      uploadedImageUrl = urlData.publicUrl;
-      
-      setTimeout(() => {
-        progressDiv.classList.add('hidden');
-      }, 2000);
-
-      return uploadedImageUrl;
-
-    } catch (error) {
-      console.error('Upload error:', error);
-      document.getElementById('uploadStatus').textContent = 'Upload failed: ' + error.message;
-      throw error;
-    }
+    document.getElementById('progressWrap').style.display = 'block';
+    let p = 0;
+    const iv = setInterval(() => { p = Math.min(p+10, 90); document.getElementById('progressBar').style.width=p+'%'; document.getElementById('progressText').textContent=p+'%'; }, 100);
+    const ext = selectedImageFile.name.split('.').pop();
+    const fileName = `${Date.now()}_${Math.random().toString(36).slice(7)}.${ext}`;
+    const { data, error } = await supabaseClient.storage.from(STORAGE_BUCKET).upload(fileName, selectedImageFile, { cacheControl:'3600', upsert:false });
+    clearInterval(iv);
+    if (error) { document.getElementById('uploadStatus').textContent = 'Upload failed: '+error.message; throw error; }
+    document.getElementById('progressBar').style.width = '100%';
+    document.getElementById('progressText').textContent = '100%';
+    document.getElementById('uploadStatus').textContent = 'Upload complete!';
+    const { data: urlData } = supabaseClient.storage.from(STORAGE_BUCKET).getPublicUrl(fileName);
+    setTimeout(() => document.getElementById('progressWrap').style.display='none', 2000);
+    return urlData.publicUrl;
   }
 
-  // Form submission
-  document.getElementById('newsForm').addEventListener('submit', async function(e) {
-    e.preventDefault();
-    await postNews();
-  });
-
   async function postNews() {
-    const title = document.getElementById("title").value.trim();
-    const category = document.getElementById("category").value;
-    const content = document.getElementById("content").value.trim();
-    const is_breaking = document.getElementById("breaking").checked;
-    const is_featured = document.getElementById("featured").checked;
-    
-    const statusMsg = document.getElementById("statusMsg");
-
-    // Validation
-    if (!title || !category || !content) {
-      showStatus("❌ Please fill all required fields", "error");
-      return;
-    }
-
-    if (content.length < 50) {
-      showStatus("❌ Content must be at least 50 characters long", "error");
-      return;
-    }
-
-    // Show loading
-    showStatus("📤 Publishing news...", "loading");
-
+    const title = document.getElementById('title').value.trim();
+    const category = document.getElementById('category').value;
+    const content = document.getElementById('content').value.trim();
+    const is_breaking = document.getElementById('breaking').checked;
+    const is_featured = document.getElementById('featured').checked;
+    if (!title || !category || !content) { showStatus('Please fill all required fields', 'error'); return; }
+    if (content.length < 50) { showStatus('Content must be at least 50 characters', 'error'); return; }
+    showStatus('Publishing…', 'loading');
     try {
       let imageUrl = null;
-
-      // Upload image if selected
-      if (selectedImageFile) {
-        showStatus("📸 Uploading image...", "loading");
-        imageUrl = await uploadImage();
-      }
-
-      // Insert news article
-      const { data, error } = await supabaseClient
-        .from("news")
-        .insert([{
-          title,
-          category,
-          content,
-          image_url: imageUrl,
-          is_breaking,
-          is_featured,
-          published_at: new Date().toISOString()
-        }])
-        .select();
-
+      if (selectedImageFile) { showStatus('Uploading image…', 'loading'); imageUrl = await uploadImage(); }
+      const { error } = await supabaseClient.from('news').insert([{ title, category, content, image_url:imageUrl, is_breaking, is_featured, published_at:new Date().toISOString() }]).select();
       if (error) throw error;
-
-      showStatus("✅ News published successfully!", "success");
-      
-      // Reset form after 2 seconds
-      setTimeout(() => {
-        resetForm();
-      }, 2000);
-
-    } catch (error) {
-      showStatus(`❌ Error: ${error.message}`, "error");
-    }
+      showStatus('✅ Published successfully!', 'success');
+      document.getElementById('statusBadge').textContent = '✓ Published';
+      document.getElementById('statusBadge').className = 'status-badge ready';
+      setTimeout(resetForm, 2500);
+    } catch(err) { showStatus('Error: '+err.message, 'error'); }
   }
 
   function saveDraft() {
-    const title = document.getElementById("title").value;
-    const category = document.getElementById("category").value;
-    const content = document.getElementById("content").value;
-    
-    // Save to localStorage
-    localStorage.setItem('newsDraft', JSON.stringify({
-      title,
-      category,
-      content,
-      timestamp: new Date().toISOString()
-    }));
-    
-    showStatus("💾 Draft saved to browser", "success");
+    localStorage.setItem('newsDraft', JSON.stringify({ title:document.getElementById('title').value, category:document.getElementById('category').value, content:document.getElementById('content').value, ts:new Date().toISOString() }));
+    showStatus('💾 Draft saved to browser', 'success');
   }
 
   function resetForm() {
-    document.getElementById("newsForm").reset();
+    document.getElementById('title').value='';
+    document.getElementById('category').value='';
+    document.getElementById('content').value='';
+    document.getElementById('breaking').checked=false;
+    document.getElementById('featured').checked=false;
     removeImage();
-    document.getElementById("statusMsg").classList.add('hidden');
+    document.getElementById('statusMsg').style.display='none';
+    document.getElementById('statusBadge').textContent='● Draft';
+    document.getElementById('statusBadge').className='status-badge draft';
   }
 
-  function showStatus(message, type) {
-    const statusMsg = document.getElementById("statusMsg");
-    statusMsg.textContent = message;
-    statusMsg.classList.remove('hidden', 'bg-red-100', 'text-red-700', 'bg-green-100', 'text-green-700', 'bg-blue-100', 'text-blue-700');
-    
-    if (type === 'error') {
-      statusMsg.classList.add('bg-red-100', 'text-red-700');
-    } else if (type === 'success') {
-      statusMsg.classList.add('bg-green-100', 'text-green-700');
-    } else {
-      statusMsg.classList.add('bg-blue-100', 'text-blue-700');
-    }
+  function showStatus(msg, type) {
+    const el = document.getElementById('statusMsg');
+    el.textContent = msg;
+    el.className = 'status-msg '+type;
+    el.style.display = 'block';
   }
 
-  // Load draft on page load
-  window.addEventListener('load', function() {
-    const draft = localStorage.getItem('newsDraft');
-    if (draft) {
-      const { title, category, content } = JSON.parse(draft);
-      if (confirm('Found a saved draft. Do you want to load it?')) {
-        document.getElementById("title").value = title;
-        document.getElementById("category").value = category;
-        document.getElementById("content").value = content;
-      }
-    }
+  window.addEventListener('load', () => {
+    const d = localStorage.getItem('newsDraft');
+    if (d) { const {title,category,content} = JSON.parse(d); if(confirm('Load saved draft?')) { document.getElementById('title').value=title; document.getElementById('category').value=category; document.getElementById('content').value=content; } }
   });
 
-  async function logout() {
-    await supabaseClient.auth.signOut();
-    window.location.replace("login.html");
-  }
+  async function logout() { await supabaseClient.auth.signOut(); window.location.replace('login.html'); }
 </script>
-
 </body>
 </html>

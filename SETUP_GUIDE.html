@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Facebook Auto-Sync Setup Guide — Nagarkot Network</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --red: #C0272D; --red-dk: #8B1A1E;
+      --cream: #FDF8F3; --ink: #1A1410; --muted: #6B6460;
+      --border: #E8E0D8; --gold: #D4A853;
+      --blue: #1877F2; --green: #16A34A;
+      --code-bg: #1E1E2E; --code-txt: #CDD6F4;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'DM Sans', sans-serif; background: var(--cream); color: var(--ink); line-height: 1.7; }
+
+    .hero {
+      background: var(--ink);
+      padding: 64px 48px 48px;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 70% 50%, rgba(192,39,45,0.25) 0%, transparent 70%);
+    }
+    .hero-inner { max-width: 900px; margin: 0 auto; position: relative; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(24,119,242,0.2); border: 1px solid rgba(24,119,242,0.4);
+      color: #93C5FD; border-radius: 20px; padding: 6px 14px;
+      font-size: 12px; font-weight: 600; letter-spacing: 0.5px;
+      margin-bottom: 20px;
+    }
+    .hero h1 { font-family: 'Playfair Display', serif; font-size: 42px; font-weight: 900; color: #fff; line-height: 1.15; margin-bottom: 16px; }
+    .hero h1 span { color: var(--gold); }
+    .hero p { color: rgba(255,255,255,0.6); font-size: 16px; max-width: 600px; }
+    .hero-steps {
+      display: flex; gap: 8px; margin-top: 32px; flex-wrap: wrap;
+    }
+    .hero-step {
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px; padding: 12px 16px;
+      font-size: 13px; color: rgba(255,255,255,0.7);
+      display: flex; align-items: center; gap: 8px;
+    }
+    .hero-step strong { color: #fff; }
+    .step-circle {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: var(--red); color: #fff;
+      font-size: 11px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+
+    .content { max-width: 900px; margin: 0 auto; padding: 48px 24px; }
+
+    .section { margin-bottom: 48px; }
+    .section-header {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 24px; padding-bottom: 16px;
+      border-bottom: 2px solid var(--border);
+    }
+    .section-num {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: var(--ink); color: #fff;
+      font-family: 'Playfair Display', serif; font-size: 18px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .section-num.done { background: var(--green); }
+    .section-num.blue { background: var(--blue); }
+    h2 { font-family: 'Playfair Display', serif; font-size: 24px; font-weight: 700; }
+    h3 { font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 600; margin: 20px 0 10px; }
+    p { font-size: 15px; color: #3A3430; margin-bottom: 12px; }
+
+    .card {
+      background: #fff; border: 1px solid var(--border);
+      border-radius: 14px; padding: 24px; margin-bottom: 16px;
+    }
+    .card-title { font-weight: 700; font-size: 15px; margin-bottom: 8px; }
+
+    .step-block {
+      display: flex; gap: 16px; margin-bottom: 20px; align-items: flex-start;
+    }
+    .step-block .num {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--ink); color: #fff;
+      font-size: 13px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+      margin-top: 2px;
+    }
+    .step-block .body { flex: 1; font-size: 14.5px; }
+    .step-block .body strong { font-weight: 700; }
+
+    code {
+      font-family: 'JetBrains Mono', monospace;
+      background: #F3EDE8; color: var(--red-dk);
+      padding: 2px 7px; border-radius: 5px;
+      font-size: 13px;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border-radius: 12px;
+      padding: 20px 24px;
+      overflow-x: auto;
+      margin: 16px 0;
+      position: relative;
+    }
+    pre code {
+      background: none; color: var(--code-txt);
+      padding: 0; font-size: 13.5px; line-height: 1.7;
+    }
+    .copy-btn {
+      position: absolute; top: 12px; right: 12px;
+      background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 6px; padding: 4px 10px;
+      font-size: 11px; font-weight: 600; cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.15s;
+    }
+    .copy-btn:hover { background: rgba(255,255,255,0.2); color: #fff; }
+
+    .alert {
+      border-radius: 10px; padding: 16px 18px;
+      font-size: 14px; margin: 16px 0;
+      border-left: 4px solid;
+      display: flex; gap: 12px; align-items: flex-start;
+    }
+    .alert.warning { background: #FFFBEB; border-color: var(--gold); color: #78350F; }
+    .alert.info    { background: #EFF6FF; border-color: var(--blue); color: #1E3A6E; }
+    .alert.success { background: #F0FDF4; border-color: var(--green); color: #14532D; }
+    .alert.danger  { background: #FEF2F2; border-color: var(--red); color: #7F1D1D; }
+    .alert-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+
+    .env-table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+    .env-table th {
+      text-align: left; padding: 10px 14px;
+      background: var(--ink); color: #fff; font-size: 12px;
+      font-weight: 600; letter-spacing: 0.5px;
+    }
+    .env-table th:first-child { border-radius: 8px 0 0 0; }
+    .env-table th:last-child  { border-radius: 0 8px 0 0; }
+    .env-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+    .env-table tr:last-child td { border-bottom: none; }
+    .env-table tr:nth-child(even) td { background: #FAFAF8; }
+
+    .flow {
+      display: flex; align-items: center; gap: 8px;
+      flex-wrap: wrap; margin: 20px 0;
+    }
+    .flow-box {
+      background: #fff; border: 1.5px solid var(--border);
+      border-radius: 10px; padding: 12px 16px;
+      font-size: 13px; font-weight: 600; text-align: center;
+    }
+    .flow-box.fb   { border-color: #1877F2; background: #EFF6FF; color: #1877F2; }
+    .flow-box.edge { border-color: var(--green); background: #F0FDF4; color: var(--green); }
+    .flow-box.db   { border-color: var(--gold); background: #FFFBEB; color: #92400E; }
+    .flow-box.site { border-color: var(--red); background: #FEF2F2; color: var(--red); }
+    .flow-arrow { font-size: 20px; color: var(--muted); }
+
+    .cta-section {
+      background: var(--ink); border-radius: 16px;
+      padding: 32px; text-align: center; margin-top: 48px;
+    }
+    .cta-section h3 { color: #fff; font-family: 'Playfair Display', serif; font-size: 22px; margin-bottom: 10px; }
+    .cta-section p  { color: rgba(255,255,255,0.5); font-size: 14px; margin-bottom: 20px; }
+    .cta-btn {
+      display: inline-block; padding: 12px 28px;
+      border-radius: 10px; font-size: 14px; font-weight: 600;
+      text-decoration: none; transition: all 0.18s; margin: 4px;
+    }
+    .cta-btn.primary { background: var(--red); color: #fff; }
+    .cta-btn.primary:hover { background: var(--red-dk); }
+    .cta-btn.blue { background: var(--blue); color: #fff; }
+    .cta-btn.blue:hover { background: #1557C0; }
+  </style>
+</head>
+<body>
+
+<!-- Hero -->
+<div class="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">
+      <svg viewBox="0 0 24 24" fill="currentColor" style="width:14px;height:14px;"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+      Facebook Auto-Sync Setup
+    </div>
+    <h1>Post on Facebook →<br><span>Publish on your site automatically</span></h1>
+    <p>Complete guide to connect your Facebook Page with Nagarkot Network using Supabase Edge Functions.</p>
+    <div class="hero-steps">
+      <div class="hero-step"><div class="step-circle">1</div><strong>Facebook</strong> Developer App</div>
+      <div class="hero-step"><div class="step-circle">2</div><strong>Supabase</strong> Edge Function</div>
+      <div class="hero-step"><div class="step-circle">3</div><strong>Webhook</strong> Registration</div>
+      <div class="hero-step"><div class="step-circle">4</div><strong>Database</strong> SQL Update</div>
+      <div class="hero-step"><div class="step-circle">5</div><strong>App Review</strong> Submission</div>
+    </div>
+  </div>
+</div>
+
+<div class="content">
+
+  <!-- How it works -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num blue">ℹ</div>
+      <h2>How it works</h2>
+    </div>
+    <div class="flow">
+      <div class="flow-box fb">📘 Facebook Page<br><small>Owner posts</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box edge">⚡ Supabase<br><small>Edge Function</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box db">🗄️ Supabase<br><small>Database</small></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-box site">🌐 nagarkotnetwork.com<br><small>Auto-published</small></div>
+    </div>
+    <p>When the Nagarkot Network Facebook Page publishes a new post, Facebook instantly notifies your Supabase Edge Function via a <strong>webhook</strong>. The Edge Function validates the request and saves the post as a news article in your Supabase database — where it immediately appears on your website.</p>
+    <div class="alert info">
+      <div class="alert-icon">ℹ️</div>
+      <div><strong>Important:</strong> This only works with a <strong>Facebook Page</strong>, not a personal profile. Make sure Nagarkot Network has a Facebook Page (which it already does based on the website footer).</div>
+    </div>
+  </div>
+
+  <!-- Step 1: Supabase DB -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">1</div>
+      <h2>Update your Supabase database table</h2>
+    </div>
+    <p>First, add two new columns to your <code>news</code> table so we can track which posts came from Facebook and avoid duplicates.</p>
+    <p>Go to your <strong>Supabase Dashboard → SQL Editor</strong> and run this:</p>
+    <div style="position:relative;">
+      <pre><code>-- Add Facebook tracking columns to your news table
+ALTER TABLE news
+  ADD COLUMN IF NOT EXISTS source TEXT DEFAULT 'manual',
+  ADD COLUMN IF NOT EXISTS fb_post_id TEXT UNIQUE,
+  ADD COLUMN IF NOT EXISTS fb_post_url TEXT;
+
+-- Create an index for fast duplicate checks
+CREATE INDEX IF NOT EXISTS idx_news_fb_post_id ON news(fb_post_id);
+CREATE INDEX IF NOT EXISTS idx_news_source ON news(source);</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+  </div>
+
+  <!-- Step 2: Facebook App -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">2</div>
+      <h2>Create a Facebook Developer App</h2>
+    </div>
+
+    <div class="step-block">
+      <div class="num">1</div>
+      <div class="body">Go to <strong>developers.facebook.com</strong> and log in with the Page owner's account.</div>
+    </div>
+    <div class="step-block">
+      <div class="num">2</div>
+      <div class="body">Click <strong>"My Apps"</strong> → <strong>"Create App"</strong>. Choose <strong>"Business"</strong> as the app type.</div>
+    </div>
+    <div class="step-block">
+      <div class="num">3</div>
+      <div class="body">Give it a name like <strong>"Nagarkot Network Sync"</strong> and click Create App.</div>
+    </div>
+    <div class="step-block">
+      <div class="num">4</div>
+      <div class="body">From the App Dashboard, go to <strong>Settings → Basic</strong>. Copy and save your <strong>App ID</strong> and <strong>App Secret</strong> — you'll need these.</div>
+    </div>
+    <div class="step-block">
+      <div class="num">5</div>
+      <div class="body">In the left menu, find <strong>Products</strong> and click <strong>"+"</strong> next to <strong>Webhooks</strong> to add it to your app.</div>
+    </div>
+
+    <div class="alert warning">
+      <div class="alert-icon">⚠️</div>
+      <div><strong>Keep your App Secret private!</strong> Never put it in your HTML files or commit it to GitHub. We'll store it safely in Supabase secrets.</div>
+    </div>
+  </div>
+
+  <!-- Step 3: Deploy Edge Function -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">3</div>
+      <h2>Deploy the Supabase Edge Function</h2>
+    </div>
+    <p>The Edge Function file is included in your download at <code>supabase/functions/facebook-webhook/index.ts</code>. Follow these steps to deploy it.</p>
+
+    <h3>3a. Install Supabase CLI</h3>
+    <div style="position:relative;">
+      <pre><code># Install Supabase CLI (if not already installed)
+npm install -g supabase
+
+# Log in to your Supabase account
+supabase login</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <h3>3b. Set up environment secrets</h3>
+    <p>These secrets are stored securely in Supabase and never exposed publicly:</p>
+    <div style="position:relative;">
+      <pre><code># Set your Facebook App Secret (from Step 2)
+supabase secrets set FB_APP_SECRET=your_facebook_app_secret_here
+
+# Set a verify token — make up ANY random string (e.g. "nagarkot2026")
+supabase secrets set FB_VERIFY_TOKEN=nagarkot2026
+
+# Your Supabase service role key (from Supabase Dashboard → Settings → API)
+supabase secrets set SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <div class="card">
+      <div class="card-title">📋 Summary of secrets you need</div>
+      <table class="env-table">
+        <tr><th>Secret Name</th><th>Where to find it</th></tr>
+        <tr><td><code>FB_APP_SECRET</code></td><td>Facebook Developer App → Settings → Basic → App Secret</td></tr>
+        <tr><td><code>FB_VERIFY_TOKEN</code></td><td>Make up any random string (e.g. <code>nagarkot2026abc</code>)</td></tr>
+        <tr><td><code>SUPABASE_SERVICE_ROLE_KEY</code></td><td>Supabase Dashboard → Project Settings → API → service_role key</td></tr>
+      </table>
+    </div>
+
+    <h3>3c. Deploy the function</h3>
+    <div style="position:relative;">
+      <pre><code># Link your project (replace with your Supabase project ID)
+supabase link --project-ref waqfebkbgyfhybompnsm
+
+# Deploy the Facebook webhook function
+supabase functions deploy facebook-webhook</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <p>After deployment, your webhook URL will be:</p>
+    <div style="position:relative;">
+      <pre><code>https://waqfebkbgyfhybompnsm.supabase.co/functions/v1/facebook-webhook</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <p style="font-size:13px; color:var(--muted);">Save this URL — you'll need it in the next step.</p>
+  </div>
+
+  <!-- Step 4: Register Webhook -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">4</div>
+      <h2>Register the Webhook in Facebook</h2>
+    </div>
+
+    <div class="step-block">
+      <div class="num">1</div>
+      <div class="body">In your Facebook App dashboard, go to <strong>Webhooks</strong> (under Products in the left sidebar).</div>
+    </div>
+    <div class="step-block">
+      <div class="num">2</div>
+      <div class="body">Select <strong>"Page"</strong> from the dropdown and click <strong>"Subscribe to this object"</strong>.</div>
+    </div>
+    <div class="step-block">
+      <div class="num">3</div>
+      <div class="body">
+        Fill in the fields:<br>
+        • <strong>Callback URL:</strong> <code>https://waqfebkbgyfhybompnsm.supabase.co/functions/v1/facebook-webhook</code><br>
+        • <strong>Verify Token:</strong> The same token you set in Step 3b (e.g. <code>nagarkot2026</code>)
+      </div>
+    </div>
+    <div class="step-block">
+      <div class="num">4</div>
+      <div class="body">Click <strong>"Verify and Save"</strong>. Facebook will call your URL to confirm it works. ✅</div>
+    </div>
+    <div class="step-block">
+      <div class="num">5</div>
+      <div class="body">After verifying, check the <strong>"feed"</strong> subscription field and click <strong>Subscribe</strong>.</div>
+    </div>
+    <div class="step-block">
+      <div class="num">6</div>
+      <div class="body">Now go to <strong>Facebook Login → Settings</strong> and add your webhook URL to the <strong>Deauthorize Callback URL</strong> and <strong>Valid OAuth Redirect URIs</strong> fields.</div>
+    </div>
+
+    <div class="alert success">
+      <div class="alert-icon">✅</div>
+      <div>If Facebook shows "Verified" — your Edge Function is deployed correctly and the connection is working!</div>
+    </div>
+  </div>
+
+  <!-- Step 5: Connect the Page -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">5</div>
+      <h2>Connect your Facebook Page to the App</h2>
+    </div>
+    <p>To receive posts from your specific Page, you need to subscribe to it using the Graph API.</p>
+
+    <h3>Get a Page Access Token</h3>
+    <div class="step-block">
+      <div class="num">1</div>
+      <div class="body">Go to <strong>developers.facebook.com/tools/explorer</strong> (Graph API Explorer).</div>
+    </div>
+    <div class="step-block">
+      <div class="num">2</div>
+      <div class="body">Select your App from the dropdown. Click <strong>"Generate Access Token"</strong>.</div>
+    </div>
+    <div class="step-block">
+      <div class="num">3</div>
+      <div class="body">Select these permissions: <code>pages_read_engagement</code>, <code>pages_manage_posts</code>.</div>
+    </div>
+    <div class="step-block">
+      <div class="num">4</div>
+      <div class="body">Copy the token. Then run this in Graph API Explorer to subscribe your page:</div>
+    </div>
+    <div style="position:relative;">
+      <pre><code>POST /{your-page-id}/subscribed_apps
+
+# Parameters:
+subscribed_fields=feed
+access_token=YOUR_PAGE_ACCESS_TOKEN</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+
+    <div class="alert info">
+      <div class="alert-icon">💡</div>
+      <div>Find your Page ID: Go to your Facebook Page → <strong>About</strong> → scroll down to see <strong>Page ID</strong>, or use Graph API: <code>GET /me?fields=id,name</code></div>
+    </div>
+  </div>
+
+  <!-- Step 6: App Review -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">6</div>
+      <h2>Submit for Facebook App Review</h2>
+    </div>
+
+    <div class="alert warning">
+      <div class="alert-icon">⏳</div>
+      <div><strong>This step is required for a public Page.</strong> Facebook requires App Review before you can receive live data from pages with many followers. This process takes 1–7 business days.</div>
+    </div>
+
+    <div class="step-block">
+      <div class="num">1</div>
+      <div class="body">In your App dashboard, go to <strong>App Review → Permissions and Features</strong>.</div>
+    </div>
+    <div class="step-block">
+      <div class="num">2</div>
+      <div class="body">Request <strong><code>pages_read_engagement</code></strong> permission. Explain that you're the Page owner and want to sync posts to your website.</div>
+    </div>
+    <div class="step-block">
+      <div class="num">3</div>
+      <div class="body">Add a short screencast showing how the integration works (you can use Loom or a simple screen recording).</div>
+    </div>
+    <div class="step-block">
+      <div class="num">4</div>
+      <div class="body">Submit for review. Facebook will email you when approved. Until then, you can test with your own personal account as a test user.</div>
+    </div>
+
+    <div class="alert success">
+      <div class="alert-icon">🎉</div>
+      <div><strong>Once approved:</strong> Every post on the Nagarkot Network Facebook Page will automatically appear on nagarkotnetwork.com within seconds!</div>
+    </div>
+  </div>
+
+  <!-- Testing -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num blue">🧪</div>
+      <h2>Test it without App Review</h2>
+    </div>
+    <p>While waiting for App Review, you can test the webhook by manually sending a test payload to your Edge Function:</p>
+    <div style="position:relative;">
+      <pre><code># Test your Edge Function directly (simulates a Facebook post)
+curl -X POST \
+  https://waqfebkbgyfhybompnsm.supabase.co/functions/v1/facebook-webhook \
+  -H "Content-Type: application/json" \
+  -d '{
+    "object": "page",
+    "entry": [{
+      "changes": [{
+        "field": "feed",
+        "value": {
+          "item": "post",
+          "message": "नगरकोट नेटवर्कको परीक्षण समाचार\nयो एक परीक्षण पोस्ट हो जुन फेसबुकबाट आएको हो।",
+          "post_id": "test_123456",
+          "created_time": 1700000000,
+          "permalink_url": "https://facebook.com/test"
+        }
+      }]
+    }]
+  }'</code></pre>
+      <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+    </div>
+    <p style="font-size:13px; color:var(--muted);">Note: The signature verification will fail for manual tests. You can temporarily comment out the signature check in the Edge Function for testing, then re-enable it.</p>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-section">
+    <h3>Ready to set up? 🚀</h3>
+    <p>Your Edge Function code is ready to deploy. Follow the steps above and your Facebook posts will auto-publish to nagarkotnetwork.com.</p>
+    <a href="https://developers.facebook.com" target="_blank" class="cta-btn blue">Open Facebook Developers</a>
+    <a href="https://supabase.com/dashboard" target="_blank" class="cta-btn primary">Open Supabase Dashboard</a>
+  </div>
+
+</div>
+
+<script>
+  function copyCode(btn) {
+    const code = btn.previousElementSibling?.querySelector('code') || btn.parentElement.querySelector('code');
+    if (code) {
+      navigator.clipboard.writeText(code.innerText.trim()).then(() => {
+        btn.textContent = 'Copied!';
+        setTimeout(() => btn.textContent = 'Copy', 2000);
+      });
+    }
+  }
+</script>
+</body>
+</html>
