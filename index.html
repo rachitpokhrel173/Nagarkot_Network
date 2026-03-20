@@ -12,6 +12,15 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@300;400;600;700&display=swap" rel="stylesheet">
 
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#C0272D">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Nagarkot Network">
+  <link rel="apple-touch-icon" href="networknagarkot-logo-removebg.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="Nagarkot Network">
     <style>
         body {
             font-family: 'Mukta', sans-serif;
@@ -1055,6 +1064,40 @@
                 }
             )
             .subscribe();
+            if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js');
+  });
+}
+
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  setTimeout(showInstallBanner, 3000);
+});
+
+function showInstallBanner() {
+  if (!deferredPrompt) return;
+  const b = document.createElement('div');
+  b.id = 'installBanner';
+  b.style.cssText = 'position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#1A1410;color:#fff;padding:14px 20px;border-radius:12px;display:flex;align-items:center;gap:14px;box-shadow:0 8px 32px rgba(0,0,0,0.3);z-index:9999;font-family:sans-serif;font-size:13px;max-width:calc(100vw - 40px);';
+  b.innerHTML = `
+    <img src="networknagarkot-logo-removebg.png" style="width:36px;height:36px;border-radius:8px;background:#fff;padding:3px;object-fit:contain;">
+    <div><div style="font-weight:700;">नगरकोट नेटवर्क</div><div style="opacity:0.5;font-size:11px;">App install गर्नुहोस्</div></div>
+    <button onclick="installApp()" style="background:#C0272D;color:#fff;border:none;padding:9px 18px;border-radius:8px;font-weight:700;cursor:pointer;">Install</button>
+    <button onclick="document.getElementById('installBanner').remove()" style="background:none;border:none;color:rgba(255,255,255,0.4);font-size:22px;cursor:pointer;padding:0;">×</button>
+  `;
+  document.body.appendChild(b);
+}
+
+async function installApp() {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  document.getElementById('installBanner')?.remove();
+}
     </script>
 
 </body>

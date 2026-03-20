@@ -1,0 +1,1254 @@
+<!DOCTYPE html>
+<html lang="ne">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>नगरकोट नेटवर्क - स्थानीय • राष्ट्रिय समाचार</title>
+  <link rel="icon" href="title-logo.png" type="image/png">
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#C0272D">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Nagarkot Network">
+  <link rel="apple-touch-icon" href="networknagarkot-logo-removebg.png">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="Nagarkot Network">
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=Mukta:wght@300;400;600;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --red:    #C0272D;
+      --red-dk: #8B1A1E;
+      --cream:  #FDF8F3;
+      --ink:    #1A1410;
+      --muted:  #6B6460;
+      --border: #E8E0D8;
+      --gold:   #D4A853;
+      --warm:   #F5EDE4;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Mukta', sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      line-height: 1.6;
+    }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: var(--cream); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+    /* ── Top bar ── */
+    .top-bar {
+      background: var(--ink);
+      color: rgba(255,255,255,0.6);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      padding: 8px 0;
+      letter-spacing: 0.3px;
+    }
+    .top-bar-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .top-bar a { color: rgba(255,255,255,0.5); text-decoration: none; transition: color 0.15s; }
+    .top-bar a:hover { color: #fff; }
+    .top-bar .sep { margin: 0 10px; opacity: 0.3; }
+
+    /* ── Breaking news ── */
+    .breaking-bar {
+      background: var(--red);
+      color: #fff;
+      padding: 9px 0;
+      overflow: hidden;
+    }
+    .breaking-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .breaking-label {
+      background: #fff;
+      color: var(--red);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 3px;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .breaking-dot {
+      width: 6px; height: 6px;
+      background: var(--red);
+      border-radius: 50%;
+      animation: blink 1.2s infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+    .breaking-ticker { overflow: hidden; flex: 1; }
+    .breaking-scroll {
+      display: inline-block;
+      white-space: nowrap;
+      animation: ticker 40s linear infinite;
+      font-size: 13.5px;
+      font-weight: 600;
+    }
+    @keyframes ticker { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+    /* ── Header ── */
+    .site-header {
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 12px rgba(26,20,16,0.06);
+    }
+    .header-main {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 70px;
+    }
+    .logo-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+    }
+    .logo-img {
+      width: 52px; height: 52px;
+      object-fit: contain;
+    }
+    .logo-text .name {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 900;
+      color: var(--ink);
+      line-height: 1.1;
+      letter-spacing: -0.3px;
+    }
+    .logo-text .name .dot { color: var(--red); }
+    .logo-text .tagline {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    /* Desktop Nav */
+    .desk-nav {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+    }
+    .desk-nav a {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13.5px;
+      font-weight: 600;
+      color: var(--muted);
+      text-decoration: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      transition: all 0.15s;
+      letter-spacing: 0.2px;
+    }
+    .desk-nav a:hover, .desk-nav a.active { background: var(--warm); color: var(--ink); }
+    .desk-nav a.active { color: var(--red); }
+
+    /* Search + Mobile */
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+    .icon-btn {
+      width: 38px; height: 38px;
+      border: none; background: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted);
+      transition: all 0.15s;
+    }
+    .icon-btn:hover { background: var(--warm); color: var(--ink); }
+    .icon-btn svg { width: 18px; height: 18px; }
+
+    /* Search bar */
+    .search-bar {
+      display: none;
+      background: var(--warm);
+      padding: 12px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .search-bar.open { display: block; }
+    .search-inner {
+      max-width: 1280px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .search-inner input {
+      width: 100%;
+      padding: 10px 16px 10px 44px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font-family: 'Mukta', sans-serif;
+      font-size: 15px;
+      background: #fff;
+      color: var(--ink);
+      outline: none;
+      transition: border-color 0.18s;
+    }
+    .search-inner input:focus { border-color: var(--red); }
+    .search-inner svg {
+      position: absolute;
+      left: 14px; top: 50%;
+      transform: translateY(-50%);
+      width: 18px; height: 18px;
+      color: var(--muted);
+    }
+
+    /* Mobile nav */
+    .mobile-nav {
+      display: none;
+      background: #fff;
+      border-top: 1px solid var(--border);
+      padding: 12px 16px;
+    }
+    .mobile-nav.open { display: block; }
+    .mobile-nav a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 14px;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--ink);
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .mobile-nav a:hover { background: var(--warm); }
+
+    /* ── Divider line ── */
+    .rule {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 0 24px;
+      border: none;
+      border-top: 2px solid var(--ink);
+    }
+    .rule.thin { border-top-width: 1px; border-color: var(--border); }
+
+    /* ── Page layout ── */
+    .page {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+
+    /* ── Section header ── */
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--ink);
+    }
+    .section-head h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-head h2 .accent { color: var(--red); }
+    .section-head a {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--red);
+      text-decoration: none;
+      letter-spacing: 0.3px;
+    }
+    .section-head a:hover { text-decoration: underline; }
+
+    /* ── Content grid ── */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+      gap: 40px;
+    }
+
+    /* ── Featured hero card ── */
+    .hero-card {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    .hero-main {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .hero-main:hover { transform: translateY(-3px); }
+    .hero-main img {
+      width: 100%; height: 380px;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.4s;
+    }
+    .hero-main:hover img { transform: scale(1.03); }
+    .hero-main .overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top, rgba(26,20,16,0.88) 0%, rgba(26,20,16,0.2) 50%, transparent 100%);
+    }
+    .hero-main .card-body {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 24px;
+    }
+    .hero-main .card-body h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.3;
+      margin-bottom: 8px;
+    }
+
+    .hero-side { display: flex; flex-direction: column; gap: 16px; }
+
+    .side-card {
+      display: flex;
+      gap: 14px;
+      padding: 14px;
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.18s;
+      flex: 1;
+    }
+    .side-card:hover { border-color: var(--red); box-shadow: 0 4px 16px rgba(192,39,45,0.08); }
+    .side-card img {
+      width: 90px; height: 80px;
+      object-fit: cover;
+      border-radius: 7px;
+      flex-shrink: 0;
+    }
+    .side-card .ph {
+      width: 90px; height: 80px;
+      background: var(--warm);
+      border-radius: 7px;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted);
+    }
+    .side-card .ph svg { width: 22px; height: 22px; }
+    .side-card-body { flex: 1; min-width: 0; }
+    .side-card-body h4 {
+      font-family: 'Playfair Display', serif;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.35;
+      margin-bottom: 6px;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    /* ── Category pill ── */
+    .cat-pill {
+      display: inline-block;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 10.5px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 3px 9px;
+      border-radius: 3px;
+      margin-bottom: 6px;
+    }
+    .cat-pill.red    { background: var(--red); color: #fff; }
+    .cat-pill.blue   { background: #1D4ED8; color: #fff; }
+    .cat-pill.green  { background: #15803D; color: #fff; }
+    .cat-pill.purple { background: #7C3AED; color: #fff; }
+    .cat-pill.orange { background: #D97706; color: #fff; }
+    .cat-pill.teal   { background: #0D9488; color: #fff; }
+    .cat-pill.pink   { background: #DB2777; color: #fff; }
+    .cat-pill.dark   { background: var(--ink); color: #fff; }
+
+    /* ── Time label ── */
+    .time-lbl {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11.5px;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .time-lbl svg { width: 12px; height: 12px; }
+
+    /* ── Latest news list ── */
+    .latest-list { display: flex; flex-direction: column; gap: 1px; }
+    .latest-item {
+      display: flex;
+      gap: 16px;
+      padding: 16px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .latest-item:last-child { border-bottom: none; }
+    .latest-item:hover .latest-title { color: var(--red); }
+    .latest-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--border);
+      line-height: 1;
+      min-width: 32px;
+      padding-top: 4px;
+    }
+    .latest-content { flex: 1; }
+    .latest-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.35;
+      margin-bottom: 6px;
+      transition: color 0.15s;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .latest-img {
+      width: 80px; height: 70px;
+      object-fit: cover;
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+    .latest-ph {
+      width: 80px; height: 70px;
+      background: var(--warm);
+      border-radius: 6px;
+      flex-shrink: 0;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar { display: flex; flex-direction: column; gap: 28px; }
+    .sidebar-section { }
+    .sidebar-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 17px;
+      font-weight: 700;
+      padding-bottom: 10px;
+      border-bottom: 2px solid var(--ink);
+      margin-bottom: 14px;
+    }
+
+    /* Trending */
+    .trend-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .trend-item:last-child { border-bottom: none; }
+    .trend-item:hover .trend-name { color: var(--red); }
+    .trend-n {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--border);
+      min-width: 24px;
+    }
+    .trend-name {
+      font-size: 14px;
+      font-weight: 600;
+      transition: color 0.15s;
+    }
+    .trend-count {
+      margin-left: auto;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--warm);
+      color: var(--muted);
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+
+    /* Social */
+    .social-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .social-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 10px;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.18s;
+      border: 1.5px solid transparent;
+    }
+    .social-btn svg { width: 16px; height: 16px; }
+    .social-btn.fb  { background: #EFF6FF; color: #1877F2; border-color: #BFDBFE; }
+    .social-btn.fb:hover  { background: #1877F2; color: #fff; }
+    .social-btn.wa  { background: #F0FDF4; color: #16A34A; border-color: #BBF7D0; }
+    .social-btn.wa:hover  { background: #16A34A; color: #fff; }
+    .social-btn.ig  { background: #FDF2F8; color: #DB2777; border-color: #FBCFE8; }
+    .social-btn.ig:hover  { background: #DB2777; color: #fff; }
+    .social-btn.yt  { background: #FEF2F2; color: var(--red); border-color: #FECACA; }
+    .social-btn.yt:hover  { background: var(--red); color: #fff; }
+
+    /* Newsletter */
+    .newsletter-box {
+      background: var(--ink);
+      border-radius: 12px;
+      padding: 22px;
+      color: #fff;
+    }
+    .newsletter-box h4 {
+      font-family: 'Playfair Display', serif;
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .newsletter-box p {
+      font-size: 13px;
+      color: rgba(255,255,255,0.55);
+      margin-bottom: 14px;
+      line-height: 1.5;
+    }
+    .newsletter-box input {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: none;
+      font-family: 'Mukta', sans-serif;
+      font-size: 14px;
+      margin-bottom: 8px;
+      outline: none;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,0.15);
+      transition: border-color 0.18s;
+    }
+    .newsletter-box input::placeholder { color: rgba(255,255,255,0.35); }
+    .newsletter-box input:focus { border-color: var(--gold); }
+    .newsletter-box button {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+      background: var(--red);
+      color: #fff;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.18s;
+    }
+    .newsletter-box button:hover { background: var(--red-dk); }
+
+    /* Cat stats */
+    .cat-stat-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.15s;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .cat-stat-item:last-child { border-bottom: none; }
+    .cat-stat-item:hover { color: var(--red); }
+    .cat-count {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 9px;
+      border-radius: 20px;
+      background: var(--warm);
+      color: var(--muted);
+    }
+
+    /* ── Skeleton ── */
+    .sk {
+      background: linear-gradient(90deg, var(--warm) 25%, var(--border) 50%, var(--warm) 75%);
+      background-size: 200% 100%;
+      animation: sk 1.4s infinite;
+      border-radius: 6px;
+    }
+    @keyframes sk { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(26,20,16,0.7);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: #fff;
+      border-radius: 14px;
+      max-width: 780px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: modalIn 0.25s ease;
+    }
+    @keyframes modalIn { from{opacity:0;transform:scale(0.96)} to{opacity:1;transform:scale(1)} }
+    .modal-header {
+      position: sticky; top: 0;
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 2;
+    }
+    .modal-close {
+      width: 34px; height: 34px;
+      border: none; background: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted);
+      transition: all 0.15s;
+    }
+    .modal-close:hover { background: var(--warm); color: var(--ink); }
+    .modal-close svg { width: 18px; height: 18px; }
+    .modal-img { width: 100%; max-height: 380px; object-fit: cover; }
+    .modal-content { padding: 28px 32px 32px; }
+    .modal-content h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px;
+      font-weight: 900;
+      line-height: 1.3;
+      margin-bottom: 12px;
+    }
+    .modal-content .body {
+      font-size: 16px;
+      line-height: 1.85;
+      color: #3A3430;
+      white-space: pre-wrap;
+    }
+
+    /* ── Footer ── */
+    footer {
+      background: var(--ink);
+      color: rgba(255,255,255,0.5);
+      margin-top: 64px;
+    }
+    .footer-main {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 52px 24px 40px;
+      display: grid;
+      grid-template-columns: 1.4fr 1fr 1fr 1fr;
+      gap: 40px;
+    }
+    .footer-brand .name {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      font-weight: 900;
+      color: #fff;
+      margin-bottom: 10px;
+    }
+    .footer-brand .name span { color: var(--red); }
+    .footer-brand p { font-size: 13px; line-height: 1.6; margin-bottom: 14px; }
+    .footer-brand .reg { font-size: 11px; opacity: 0.4; line-height: 1.7; }
+    .footer-col h5 {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: rgba(255,255,255,0.3);
+      margin-bottom: 14px;
+    }
+    .footer-col a, .footer-col p {
+      display: block;
+      font-size: 13.5px;
+      color: rgba(255,255,255,0.5);
+      text-decoration: none;
+      margin-bottom: 8px;
+      transition: color 0.15s;
+    }
+    .footer-col a:hover { color: #fff; }
+    .footer-bottom {
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 16px 24px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+    }
+    .footer-bottom a { color: rgba(255,255,255,0.4); text-decoration: none; }
+    .footer-bottom a:hover { color: #fff; }
+
+    /* ── Responsive ── */
+    @media (max-width: 1024px) {
+      .content-grid { grid-template-columns: 1fr; }
+      .sidebar { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+      .footer-main { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 768px) {
+      .hero-card { grid-template-columns: 1fr; }
+      .hero-main img { height: 260px; }
+      .desk-nav { display: none; }
+      .sidebar { grid-template-columns: 1fr; }
+      .footer-main { grid-template-columns: 1fr; gap: 28px; }
+    }
+    @media (max-width: 480px) {
+      .top-bar-inner .top-bar-right { display: none; }
+    }
+
+    /* ── Fade in ── */
+    .fade { animation: fadeUp 0.4s ease both; }
+    @keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes slideUp { from{opacity:0;transform:translateX(-50%) translateY(20px)} to{opacity:1;transform:translateX(-50%) translateY(0)} }
+  </style>
+</head>
+<body>
+
+<script>
+  const SUPABASE_URL = "https://waqfebkbgyfhybompnsm.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndhcWZlYmtiZ3lmaHlib21wbnNtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU5MDE5MzQsImV4cCI6MjA4MTQ3NzkzNH0.0WttHhOGKaP60ixIkT1MnqV4jbxgteN68ez-nCYU16c";
+  const { createClient } = supabase;
+  const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+</script>
+
+<!-- Top Bar -->
+<div class="top-bar">
+  <div class="top-bar-inner">
+    <div style="display:flex;align-items:center;gap:6px;">
+      <svg style="width:13px;height:13px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      <span id="currentDate">लोड हुँदैछ...</span>
+    </div>
+    <div class="top-bar-right" style="display:flex;align-items:center;gap:4px;">
+      <span>📞 9861466642</span>
+      <span class="sep">|</span>
+      <a href="mailto:nagarkotnetwork@gmail.com">nagarkotnetwork@gmail.com</a>
+    </div>
+  </div>
+</div>
+
+<!-- Breaking News -->
+<div class="breaking-bar">
+  <div class="breaking-inner">
+    <div class="breaking-label"><div class="breaking-dot"></div>BREAKING</div>
+    <div class="breaking-ticker">
+      <span id="breakingNews" class="breaking-scroll">• लोड हुँदैछ...</span>
+    </div>
+  </div>
+</div>
+
+<!-- Header -->
+<header class="site-header">
+  <div class="header-main">
+    <a href="#" class="logo-wrap" onclick="filterByCategory('all'); return false;">
+      <img src="networknagarkot-logo-removebg.png" alt="Logo" class="logo-img" onerror="this.style.display='none'">
+      <div class="logo-text">
+        <div class="name">नगरकोट<span class="dot">•</span>Network</div>
+        <div class="tagline">स्थानीय • राष्ट्रिय समाचार</div>
+      </div>
+    </a>
+
+    <nav class="desk-nav">
+      <a href="#" onclick="filterByCategory('all'); return false;" class="active" id="nav-all">सबै</a>
+      <a href="#" onclick="filterByCategory('समाचार'); return false;" id="nav-samachar">समाचार</a>
+      <a href="#" onclick="filterByCategory('राजनीति'); return false;" id="nav-rajniti">राजनीति</a>
+      <a href="#" onclick="filterByCategory('शिक्षा'); return false;" id="nav-shiksha">शिक्षा</a>
+      <a href="#" onclick="filterByCategory('प्रविधि'); return false;" id="nav-prabidhi">प्रविधि</a>
+      <a href="#" onclick="filterByCategory('खेलकुद'); return false;" id="nav-khelkud">खेलकुद</a>
+    </nav>
+
+    <div class="header-actions">
+      <button class="icon-btn" onclick="toggleSearch()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      </button>
+      <button class="icon-btn" onclick="toggleMobileMenu()" style="display:none;" id="menuBtn">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="search-bar" id="searchBar">
+    <div class="search-inner">
+      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input type="text" id="searchInput" placeholder="समाचार खोज्नुहोस्..." oninput="handleSearch()">
+    </div>
+  </div>
+
+  <nav class="mobile-nav" id="mobileNav">
+    <a href="#" onclick="filterByCategory('all'); toggleMobileMenu(); return false;">🏠 सबै</a>
+    <a href="#" onclick="filterByCategory('समाचार'); toggleMobileMenu(); return false;">📰 समाचार</a>
+    <a href="#" onclick="filterByCategory('राजनीति'); toggleMobileMenu(); return false;">🏛️ राजनीति</a>
+    <a href="#" onclick="filterByCategory('शिक्षा'); toggleMobileMenu(); return false;">🎓 शिक्षा</a>
+    <a href="#" onclick="filterByCategory('प्रविधि'); toggleMobileMenu(); return false;">💻 प्रविधि</a>
+    <a href="#" onclick="filterByCategory('खेलकुद'); toggleMobileMenu(); return false;">⚽ खेलकुद</a>
+  </nav>
+</header>
+
+<!-- Main content -->
+<div class="page">
+  <div class="content-grid">
+
+    <!-- Left: main news -->
+    <div>
+      <!-- Featured -->
+      <div class="section-head">
+        <h2><span class="accent">★</span> विशेष समाचार</h2>
+      </div>
+      <div id="featuredNews">
+        <!-- Skeleton -->
+        <div class="hero-card">
+          <div class="sk" style="height:380px;border-radius:12px;"></div>
+          <div style="display:flex;flex-direction:column;gap:16px;">
+            <div class="sk" style="height:110px;border-radius:10px;"></div>
+            <div class="sk" style="height:110px;border-radius:10px;"></div>
+            <div class="sk" style="height:110px;border-radius:10px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Latest -->
+      <div class="section-head" style="margin-top:40px;">
+        <h2>ताजा समाचार</h2>
+        <a href="#">सबै हेर्नुहोस् →</a>
+      </div>
+      <div id="latestNews" class="latest-list">
+        <div style="padding:16px 0;border-bottom:1px solid var(--border);display:flex;gap:16px;">
+          <div class="sk" style="width:32px;height:32px;border-radius:4px;flex-shrink:0;"></div>
+          <div style="flex:1;"><div class="sk" style="height:16px;width:80%;margin-bottom:8px;"></div><div class="sk" style="height:12px;width:40%;"></div></div>
+          <div class="sk" style="width:80px;height:70px;border-radius:6px;flex-shrink:0;"></div>
+        </div>
+        <div style="padding:16px 0;border-bottom:1px solid var(--border);display:flex;gap:16px;">
+          <div class="sk" style="width:32px;height:32px;border-radius:4px;flex-shrink:0;"></div>
+          <div style="flex:1;"><div class="sk" style="height:16px;width:70%;margin-bottom:8px;"></div><div class="sk" style="height:12px;width:35%;"></div></div>
+          <div class="sk" style="width:80px;height:70px;border-radius:6px;flex-shrink:0;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: sidebar -->
+    <aside class="sidebar">
+
+      <!-- Trending -->
+      <div class="sidebar-section">
+        <div class="sidebar-title">ट्रेन्डिङ</div>
+        <div id="trendingTopics">
+          <div class="trend-item"><div class="sk" style="height:14px;width:100%;"></div></div>
+          <div class="trend-item"><div class="sk" style="height:14px;width:100%;"></div></div>
+          <div class="trend-item"><div class="sk" style="height:14px;width:100%;"></div></div>
+        </div>
+      </div>
+
+      <!-- Newsletter -->
+      <div class="newsletter-box">
+        <h4>न्युजलेटर</h4>
+        <p>हप्तामा दुई चोटि मुख्य समाचारहरू सिधै तपाईंको इमेलमा।</p>
+        <form id="newsletterForm" onsubmit="subscribeNewsletter(event)">
+          <input type="email" id="newsletterEmail" placeholder="तपाईंको इमेल..." required>
+          <button type="submit">सदस्यता लिनुहोस्</button>
+        </form>
+        <p id="newsletterMsg" style="font-size:12px;margin-top:8px;display:none;"></p>
+      </div>
+
+      <!-- Social -->
+      <div class="sidebar-section">
+        <div class="sidebar-title">फलो गर्नुहोस्</div>
+        <div class="social-grid">
+          <a href="https://www.facebook.com/profile.php?id=100093968808553" class="social-btn fb" target="_blank">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            Facebook
+          </a>
+          <a href="https://wa.me/9779861466642" class="social-btn wa" target="_blank">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.52 3.48A11.82 11.82 0 003.7 19.3L2 22l2.82-.74A11.8 11.8 0 1020.52 3.48z"/></svg>
+            WhatsApp
+          </a>
+          <a href="#" class="social-btn ig">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            Instagram
+          </a>
+          <a href="#" class="social-btn yt">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+            YouTube
+          </a>
+        </div>
+      </div>
+
+      <!-- Categories -->
+      <div class="sidebar-section">
+        <div class="sidebar-title">वर्ग अनुसार</div>
+        <div id="categoryStats">
+          <div class="sk" style="height:40px;margin-bottom:6px;"></div>
+          <div class="sk" style="height:40px;margin-bottom:6px;"></div>
+          <div class="sk" style="height:40px;"></div>
+        </div>
+      </div>
+
+    </aside>
+  </div>
+</div>
+
+<!-- Article Modal -->
+<div class="modal-overlay" id="articleModal">
+  <div class="modal-box">
+    <div class="modal-header">
+      <div id="modalTags" style="display:flex;gap:6px;"></div>
+      <button class="modal-close" onclick="closeModal()">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <img id="modalImg" src="" alt="" class="modal-img" style="display:none;">
+    <div class="modal-content">
+      <h1 id="modalTitle"></h1>
+      <div style="display:flex;align-items:center;gap:16px;margin:10px 0 20px;padding-bottom:16px;border-bottom:1px solid var(--border);">
+        <span id="modalTime" class="time-lbl"></span>
+      </div>
+      <div id="modalBody" class="body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-main">
+    <div class="footer-brand">
+      <div class="name">नगरकोट<span>•</span>Network</div>
+      <p>स्थानीय र राष्ट्रिय समाचारको विश्वसनीय स्रोत। प्रधान सम्पादक: सुमन दुलाल। अध्यक्ष: प्रदिप न्यौपाने।</p>
+      <div class="reg">
+        सूचना विभाग दर्ता: ४०४३-२०७९/८०<br>
+        प्रेस काउन्सिल दर्ता: ४१६३-२०८०/८१
+      </div>
+    </div>
+    <div class="footer-col">
+      <h5>द्रुत लिङ्क</h5>
+      <a href="#" onclick="filterByCategory('all'); return false;">सबै समाचार</a>
+      <a href="#" onclick="filterByCategory('राजनीति'); return false;">राजनीति</a>
+      <a href="#" onclick="filterByCategory('शिक्षा'); return false;">शिक्षा</a>
+      <a href="#" onclick="filterByCategory('प्रविधि'); return false;">प्रविधि</a>
+      <a href="#" onclick="filterByCategory('खेलकुद'); return false;">खेलकुद</a>
+    </div>
+    <div class="footer-col">
+      <h5>वर्ग</h5>
+      <a href="#" onclick="filterByCategory('मनोरञ्जन'); return false;">मनोरञ्जन</a>
+      <a href="#" onclick="filterByCategory('अर्थ'); return false;">अर्थ/वाणिज्य</a>
+      <a href="#" onclick="filterByCategory('स्वास्थ्य'); return false;">स्वास्थ्य</a>
+      <a href="login.html">Admin Login</a>
+    </div>
+    <div class="footer-col">
+      <h5>सम्पर्क</h5>
+      <p>📞 9861466642</p>
+      <p>✉️ nagarkotnetwork@gmail.com</p>
+      <a href="https://www.facebook.com/profile.php?id=100093968808553" target="_blank">Facebook Page</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© २०२६ Nagarkot Network — सबै अधिकार सुरक्षित</p>
+    <p>Developed by <a href="https://rachitpokhrel.com.np" target="_blank">Rachit Pokhrel</a></p>
+  </div>
+</footer>
+
+<script>
+  let allNews = [], currentFilter = 'all';
+  const CAT_COLORS = { 'समाचार':'red','राजनीति':'blue','शिक्षा':'green','प्रविधि':'purple','खेलकुद':'orange','अर्थ':'teal','मनोरञ्जन':'pink','स्वास्थ्य':'dark' };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    loadAllNews(); loadBreakingNews(); updateDate();
+    // Show mobile menu button on small screens
+    if (window.innerWidth <= 768) document.getElementById('menuBtn').style.display = 'flex';
+    window.addEventListener('resize', () => {
+      document.getElementById('menuBtn').style.display = window.innerWidth <= 768 ? 'flex' : 'none';
+    });
+  });
+
+  async function loadAllNews() {
+    try {
+      const { data } = await supabaseClient.from('news').select('*').order('created_at', { ascending: false });
+      allNews = data || [];
+      renderNews(); updateTrending(); updateCategoryStats();
+    } catch(e) { console.error(e); }
+  }
+
+  async function loadBreakingNews() {
+    try {
+      const { data } = await supabaseClient.from('news').select('title').eq('is_breaking', true).order('created_at', { ascending: false }).limit(5);
+      const el = document.getElementById('breakingNews');
+      if (data && data.length) {
+        const txt = data.map(n => `• ${n.title}`).join('    ');
+        el.textContent = txt + '    ' + txt;
+      } else {
+        el.textContent = '• कुनै ब्रेकिङ समाचार छैन';
+      }
+    } catch(e) {}
+  }
+
+  function renderNews() {
+    const filtered = currentFilter === 'all' ? allNews : allNews.filter(n => n.category === currentFilter);
+    const featured = allNews.filter(n => n.is_featured).slice(0, 4);
+    const toShow = featured.length >= 2 ? featured : filtered.slice(0, 4);
+    const [main, ...rest] = toShow;
+
+    // Featured
+    if (!main) {
+      document.getElementById('featuredNews').innerHTML = `<div style="padding:40px;text-align:center;color:var(--muted);font-size:14px;">कुनै समाचार भेटिएन।</div>`;
+    } else {
+      document.getElementById('featuredNews').innerHTML = `
+        <div class="hero-card fade">
+          <div class="hero-main" onclick="viewNews(${main.id})">
+            ${main.image_url
+              ? `<img src="${main.image_url}" alt="${main.title}" onerror="this.src='https://images.unsplash.com/photo-1504711434969-e33886168f5c?w=800&q=80'">`
+              : `<div style="width:100%;height:380px;background:linear-gradient(135deg,var(--ink),#3A3430);display:flex;align-items:center;justify-content:center;"><svg style="width:48px;height:48px;opacity:0.2;color:#fff;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></div>`}
+            <div class="overlay"></div>
+            <div class="card-body">
+              <span class="cat-pill" style="background:var(--red);color:#fff;">${main.category}</span>
+              <h3>${main.title}</h3>
+              <div class="time-lbl" style="color:rgba(255,255,255,0.6);">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                ${timeAgo(main.created_at)}
+              </div>
+            </div>
+          </div>
+          <div class="hero-side">
+            ${rest.slice(0,3).map(n => `
+              <div class="side-card" onclick="viewNews(${n.id})">
+                ${n.image_url
+                  ? `<img src="${n.image_url}" alt="${n.title}" onerror="this.style.display='none'">`
+                  : `<div class="ph"><svg style="width:22px;height:22px;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14"/></svg></div>`}
+                <div class="side-card-body">
+                  <span class="cat-pill ${CAT_COLORS[n.category]||'dark'}">${n.category}</span>
+                  <h4>${n.title}</h4>
+                  <div class="time-lbl">${timeAgo(n.created_at)}</div>
+                </div>
+              </div>`).join('')}
+          </div>
+        </div>`;
+    }
+
+    // Latest
+    const latest = filtered.slice(4, 14);
+    if (!latest.length) {
+      document.getElementById('latestNews').innerHTML = `<div style="padding:32px 0;text-align:center;color:var(--muted);">यस श्रेणीमा कुनै समाचार छैन।</div>`;
+    } else {
+      document.getElementById('latestNews').innerHTML = latest.map((n,i) => `
+        <div class="latest-item fade" style="animation-delay:${i*0.04}s" onclick="viewNews(${n.id})">
+          <div class="latest-num" style="color:${i<3?'var(--red)':'var(--border)'}">0${i+1}</div>
+          <div class="latest-content">
+            <span class="cat-pill ${CAT_COLORS[n.category]||'dark'}">${n.category}</span>
+            <div class="latest-title">${n.title}</div>
+            <div class="time-lbl">${timeAgo(n.created_at)}</div>
+          </div>
+          ${n.image_url ? `<img class="latest-img" src="${n.image_url}" alt="" onerror="this.style.display='none'">` : `<div class="latest-ph"></div>`}
+        </div>`).join('');
+    }
+  }
+
+  function updateTrending() {
+    const counts = {};
+    allNews.forEach(n => counts[n.category] = (counts[n.category]||0)+1);
+    const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]).slice(0,5);
+    document.getElementById('trendingTopics').innerHTML = sorted.map(([cat,count],i) => `
+      <div class="trend-item" onclick="filterByCategory('${cat}')">
+        <div class="trend-n">0${i+1}</div>
+        <div class="trend-name">${cat}</div>
+        <div class="trend-count">${count}</div>
+      </div>`).join('');
+  }
+
+  function updateCategoryStats() {
+    const counts = {};
+    allNews.forEach(n => counts[n.category] = (counts[n.category]||0)+1);
+    document.getElementById('categoryStats').innerHTML = Object.entries(counts)
+      .sort((a,b)=>b[1]-a[1])
+      .map(([cat,count]) => `
+        <div class="cat-stat-item" onclick="filterByCategory('${cat}')">
+          <span>${cat}</span>
+          <span class="cat-count">${count}</span>
+        </div>`).join('');
+  }
+
+  function filterByCategory(cat) {
+    currentFilter = cat;
+    document.querySelectorAll('.desk-nav a').forEach(a => a.classList.remove('active'));
+    const map = {'all':'nav-all','समाचार':'nav-samachar','राजनीति':'nav-rajniti','शिक्षा':'nav-shiksha','प्रविधि':'nav-prabidhi','खेलकुद':'nav-khelkud'};
+    if(map[cat]) document.getElementById(map[cat])?.classList.add('active');
+    renderNews();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function handleSearch() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    if (!q || q.length < 2) { currentFilter = 'all'; renderNews(); return; }
+    const results = allNews.filter(n => n.title.toLowerCase().includes(q) || n.content.toLowerCase().includes(q));
+    const oldFilter = currentFilter;
+    allNews = results; currentFilter = 'all';
+    renderNews();
+    allNews = [...allNews]; // restore will happen on next load
+    // Quick fix: reload actual data when search is cleared
+    if (!q) loadAllNews();
+  }
+
+  function viewNews(id) {
+    const n = allNews.find(x => x.id === id); if (!n) return;
+    const modal = document.getElementById('articleModal');
+    const img = document.getElementById('modalImg');
+    if (n.image_url) { img.src = n.image_url; img.style.display = 'block'; } else img.style.display = 'none';
+    document.getElementById('modalTitle').textContent = n.title;
+    document.getElementById('modalTime').innerHTML = `<svg fill="none" stroke="currentColor" viewBox="0 0 24 24" style="width:12px;height:12px;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg> ${timeAgo(n.created_at)}`;
+    document.getElementById('modalBody').textContent = n.content;
+    document.getElementById('modalTags').innerHTML = `<span class="cat-pill ${CAT_COLORS[n.category]||'dark'}">${n.category}</span>${n.is_breaking?'<span class="cat-pill red">Breaking</span>':''}${n.is_featured?'<span class="cat-pill" style="background:var(--gold);color:var(--ink);">Featured</span>':''}`;
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    document.getElementById('articleModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  document.getElementById('articleModal').addEventListener('click', e => {
+    if (e.target === document.getElementById('articleModal')) closeModal();
+  });
+
+  async function subscribeNewsletter(e) {
+    e.preventDefault();
+    const email = document.getElementById('newsletterEmail').value;
+    const msg = document.getElementById('newsletterMsg');
+    try {
+      const { error } = await supabaseClient.from('newsletter_subscribers').insert([{ email }]);
+      if (error && error.code === '23505') { msg.textContent = '✓ तपाईं पहिले नै सदस्य हुनुहुन्छ'; msg.style.color = 'rgba(255,255,255,0.5)'; }
+      else if (error) throw error;
+      else { msg.textContent = '✓ सफलतापूर्वक सदस्यता लिइयो!'; msg.style.color = '#86EFAC'; document.getElementById('newsletterForm').reset(); }
+    } catch { msg.textContent = '✗ त्रुटि भयो।'; msg.style.color = '#FCA5A5'; }
+    msg.style.display = 'block';
+    setTimeout(() => msg.style.display = 'none', 3000);
+  }
+
+  function toggleSearch() {
+    const bar = document.getElementById('searchBar');
+    bar.classList.toggle('open');
+    if (bar.classList.contains('open')) document.getElementById('searchInput').focus();
+  }
+  function toggleMobileMenu() { document.getElementById('mobileNav').classList.toggle('open'); }
+
+  function updateDate() {
+    document.getElementById('currentDate').textContent = new Date().toLocaleDateString('ne-NP', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  }
+
+  function timeAgo(d) {
+    if (!d) return '';
+    const s = (Date.now() - new Date(d)) / 1000;
+    if (s < 60) return 'भर्खरै';
+    if (s < 3600) return `${Math.floor(s/60)} मिनेट अगाडि`;
+    if (s < 86400) return `${Math.floor(s/3600)} घण्टा अगाडि`;
+    if (s < 604800) return `${Math.floor(s/86400)} दिन अगाडि`;
+    return new Date(d).toLocaleDateString('ne-NP');
+  }
+
+  // Real-time
+  supabaseClient.channel('news').on('postgres_changes', { event: '*', schema: 'public', table: 'news' }, () => { loadAllNews(); loadBreakingNews(); }).subscribe();
+
+  // ── PWA: Register Service Worker ──
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/sw.js')
+        .then(reg => console.log('✅ Service Worker registered'))
+        .catch(err => console.log('SW error:', err));
+    });
+  }
+
+  // ── PWA: Install prompt banner ──
+  let deferredPrompt;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    // Show install banner after 3 seconds
+    setTimeout(showInstallBanner, 3000);
+  });
+
+  function showInstallBanner() {
+    if (!deferredPrompt) return;
+    const banner = document.createElement('div');
+    banner.id = 'installBanner';
+    banner.style.cssText = `
+      position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
+      background:var(--ink);color:#fff;
+      padding:14px 20px;border-radius:12px;
+      display:flex;align-items:center;gap:14px;
+      box-shadow:0 8px 32px rgba(0,0,0,0.25);
+      z-index:999;font-family:'DM Sans',sans-serif;font-size:13.5px;
+      max-width:calc(100vw - 40px);animation:slideUp 0.3s ease;
+    `;
+    banner.innerHTML = `
+      <img src="networknagarkot-logo-removebg.png" style="width:36px;height:36px;border-radius:8px;object-fit:contain;background:#fff;padding:3px;">
+      <div>
+        <div style="font-weight:700;margin-bottom:2px;">नगरकोट नेटवर्क</div>
+        <div style="font-size:12px;opacity:0.6;">App install गर्नुहोस्</div>
+      </div>
+      <button onclick="installApp()" style="background:var(--red);color:#fff;border:none;padding:9px 18px;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">Install</button>
+      <button onclick="document.getElementById('installBanner').remove()" style="background:none;border:none;color:rgba(255,255,255,0.5);cursor:pointer;font-size:20px;padding:0 4px;line-height:1;">×</button>
+    `;
+    document.body.appendChild(banner);
+  }
+
+  async function installApp() {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') console.log('✅ App installed!');
+    deferredPrompt = null;
+    document.getElementById('installBanner')?.remove();
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,37 @@
+{
+  "name": "नगरकोट नेटवर्क",
+  "short_name": "Nagarkot",
+  "description": "स्थानीय र राष्ट्रिय समाचारको विश्वसनीय स्रोत",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FDF8F3",
+  "theme_color": "#C0272D",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "networknagarkot-logo-removebg.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "networknagarkot-logo-removebg.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["news"],
+  "lang": "ne",
+  "scope": "/",
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "ताजा समाचार",
+      "short_name": "समाचार",
+      "description": "नयाँ समाचार हेर्नुहोस्",
+      "url": "/",
+      "icons": [{ "src": "networknagarkot-logo-removebg.png", "sizes": "96x96" }]
+    }
+  ]
+}
